@@ -2,7 +2,7 @@
 
 ## Installation Steps
 
-### Git clone capston
+### Git clone capstone
 ```
 # Using https
 git clone https://github.com/andrewipstirling/capstone.git
