@@ -136,18 +136,28 @@
       </link>
     </model>
     <state world_name='default'>
-      <sim_time>194 3000000</sim_time>
-      <real_time>195 314803229</real_time>
-      <wall_time>1703102631 580786027</wall_time>
-      <iterations>194003</iterations>
+      <sim_time>1550 8000000</sim_time>
+      <real_time>994 673839487</real_time>
+      <wall_time>1703265528 398467544</wall_time>
+      <iterations>984319</iterations>
       <model name='aruco_box'>
-        <pose>-1.2e-05 0 0.020012 2e-06 -0.000587 6e-06</pose>
+        <pose>-1e-06 0 0.020001 2e-06 -5.7e-05 2e-06</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>-1.2e-05 0 0.020012 2e-06 -0.000587 6e-06</pose>
+          <pose>-1e-06 0 0.020001 2e-06 -5.7e-05 2e-06</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0.023388 0.023645 0.069669 -1.18152 1.18083 -2.9e-05</acceleration>
-          <wrench>0.023388 0.023645 0.069669 0 -0 0</wrench>
+          <acceleration>0.02335 -0.023352 -0.046702 1.16759 1.16752 0</acceleration>
+          <wrench>0.02335 -0.023352 -0.046702 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='distorted_camera'>
+        <pose>-0.05 -0.05 2.5 -3.14159 1.57079 -3.14159</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-0 -0 2.45 -3.14159 1.57079 -3.14159</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='ground_plane'>
@@ -166,10 +176,84 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>0.318493 -0.326983 0.11198 0 0.195643 2.2602</pose>
+        <pose>-6.91305 -2.05915 4.54021 -0 0.383644 0.164194</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
     </gui>
+    <model name='distorted_camera'>
+      <pose>0 0 2 0 1.57 0</pose>
+      <static>1</static>
+      <link name='link'>
+        <pose>0.05 0.05 0.05 0 -0 0</pose>
+        <inertial>
+          <mass>0.1</mass>
+          <inertia>
+            <ixx>0.000166667</ixx>
+            <iyy>0.000166667</iyy>
+            <izz>0.000166667</izz>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyz>0</iyz>
+          </inertia>
+          <pose>0 0 0 0 -0 0</pose>
+        </inertial>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>0.1 0.1 0.1</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>0.1 0.1 0.1</size>
+            </box>
+          </geometry>
+        </visual>
+        <sensor name='camera' type='camera'>
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image>
+              <width>320</width>
+              <height>240</height>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>100</far>
+            </clip>
+            <distortion>
+              <k1>-0.25</k1>
+              <k2>0.12</k2>
+              <k3>0</k3>
+              <p1>-0.00028</p1>
+              <p2>-5e-05</p2>
+              <center>0.5 0.5</center>
+            </distortion>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <visualize>1</visualize>
+        </sensor>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>-0.041105 0.214838 0 0 -0 0</pose>
+    </model>
   </world>
 </sdf>
