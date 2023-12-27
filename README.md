@@ -25,7 +25,7 @@ catkin init
 ln -s $tmp_var/capstone/ros_aruco_gazebo src
 ```
 
-## Running Empty Simulation
+## Running Simulation (1 Camera + 1 Tag)
 ```
 catkin build
 # re-source ws
