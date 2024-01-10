@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(ros_aruco_gazebo)
+project(data_fusion_py)
 
 ## Use C++14
 set(CMAKE_CXX_STANDARD 14)
@@ -50,4 +50,3 @@ include_directories(
 	${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
-
