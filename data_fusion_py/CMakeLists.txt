@@ -15,9 +15,10 @@ find_package(OpenCV)
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED
   COMPONENTS
-    roscpp
     rospy
     std_msgs
+    sensor_msgs
+    cv_bridge
 )
 
 ###################################
@@ -33,9 +34,10 @@ catkin_package(
   INCLUDE_DIRS       
   LIBRARIES
   CATKIN_DEPENDS
-    roscpp
     rospy
     std_msgs
+    sensor_msgs
+    cv_bridge
   DEPENDS 
 )
 
@@ -48,5 +50,9 @@ catkin_package(
 include_directories(
 	include
 	${catkin_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
+)
+
+catkin_install_python(PROGRAMS src/image_sub.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
