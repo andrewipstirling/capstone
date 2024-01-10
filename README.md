@@ -32,3 +32,19 @@ catkin build
 source devel/setup.bash
 roslaunch ros_aruco_gazebo gazebo_sim.launch
 ```
+### Using *ros_aruco_gazebo*
+
+After launching, following topics are available:
+- /pi_camera/camera_info
+- /pi_camera/image_raw
+- /pi_camera/image_raw/compressed
+- /pi_camera/image_raw/compressed/parameter_descriptions
+- /pi_camera/image_raw/compressed/parameter_updates
+- /pi_camera/image_raw/compressedDepth
+- /pi_camera/image_raw/compressedDepth/parameter_descriptions
+- /pi_camera/image_raw/compressedDepth/parameter_updates
+- /pi_camera/image_raw/theora
+- /pi_camera/image_raw/theora/parameter_descriptions
+- /pi_camera/image_raw/theora/parameter_updates
+- /pi_camera/parameter_descriptions
+- /pi_camera/parameter_updates
