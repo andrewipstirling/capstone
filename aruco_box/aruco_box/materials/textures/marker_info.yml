@@ -1,8 +1,8 @@
-aruco_dict: 6X6_250
+aruco_dict: 6X6_100
 markers:
-  back: 4
+  back: 1
   botton: 1
-  front: 2
-  left: 0
-  right: 5
-  top: 3
+  front: 1
+  left: 1
+  right: 1
+  top: 1

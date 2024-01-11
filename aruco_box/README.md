@@ -25,4 +25,8 @@ Open Gazebo and navigate to the "Insert" tab. There, you will find the "Box with
 
 You can create the texture for the cube yourself. See the script "src/create_marker_tile_image.py" for more details. 
 The Blender model is also added to the repo (aruco_box/aruco_marker.blend). 
+```
+/bin/python3 /home/astirl/Documents/capstone/aruco_box/src/create_marker_tile_image.py /home/astirl/Documents/capstone/aruco_box/aruco_box/materials/textures
+```
+
 
