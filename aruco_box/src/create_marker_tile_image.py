@@ -47,7 +47,7 @@ class TileMap:
 @click.argument("path", type=click.Path(exists=True))
 @click.option("--tile_size", type=int, default=100)
 def main(path, tile_size):
-    margin = int(0.25 * tile_size)
+    margin = int(0.15 * tile_size)
 
     marker_factory = MarkerFactory()
     tile_map = TileMap(tile_size)
