@@ -2,6 +2,7 @@ import rospy
 import cv2
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
+from sensor_msgs.msg import CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
 
 
@@ -14,8 +15,12 @@ class ImageSub:
         self.cv_img_in = None
         self.cv_img_out = None
 
+        self.encoding_type = 'bgr8'
+
         #create image subscriber object
         self.sub_image_raw = rospy.Subscriber("/pi_camera/image_raw",Image,self.image_cb) 
+        
+        self.pi_camera_info = rospy.Subscriber("/pi_camera/camera_info", CameraInfo, self.camera_info_cb)
         
         self.pub_image = rospy.Publisher('data_fusion/cv_image',Image,queue_size=1)
 
@@ -29,9 +34,9 @@ class ImageSub:
     
     def find_markers(self):
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(self.img_msg,desired_encoding='passthrough')
-            cv_image = cv2.transpose(cv_image)
-            cv_image = cv2.flip(cv_image,1)
+            cv_image = self.bridge.imgmsg_to_cv2(self.img_msg,desired_encoding=self.encoding_type)
+            # cv_image = cv2.transpose(cv_image)
+            cv_image = cv2.flip(cv_image,0)
         except CvBridgeError as e:
             rospy.logwarn(e)
 
@@ -39,35 +44,20 @@ class ImageSub:
         
         # arucoDict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_100)
         # arucoParams = cv2.aruco.DetectorParameters_create()
-        arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_100)
+        arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
         arucoParams = cv2.aruco.DetectorParameters()
+        # arucoParams.polygonalApproxAccuracyRate = 0.01
+        # arucoParams.useAruco3Detection = True
         detector = cv2.aruco.ArucoDetector(arucoDict,arucoParams)
-        try:
-            corners, ids, rejected = detector.detectMarkers(cv_image)
-        except CvBridgeError as e:
-            rospy.logwarn(e)
         
-        if len(corners) > 0:
-            # flatten the ArUco IDs list
-            ids = ids.flatten()
-            # loop over the detected ArUCo corners
-            for (markerCorner, markerID) in zip(corners, ids):
-                # extract the marker corners (which are always returned in
-                # top-left, top-right, bottom-right, and bottom-left order)
-                corners = markerCorner.reshape((4, 2))
-                (topLeft, topRight, bottomRight, bottomLeft) = corners
-                # convert each of the (x, y)-coordinate pairs to integers
-                topRight = (int(topRight[0]), int(topRight[1]))
-                bottomRight = (int(bottomRight[0]), int(bottomRight[1]))
-                bottomLeft = (int(bottomLeft[0]), int(bottomLeft[1]))
-                topLeft = (int(topLeft[0]), int(topLeft[1]))
-                # draw the bounding box of the ArUCo detection
-                cv2.line(cv_image, topLeft, topRight, (0, 255, 0), 2)
-                cv2.line(cv_image, topRight, bottomRight, (0, 255, 0), 2)
-                cv2.line(cv_image, bottomRight, bottomLeft, (0, 255, 0), 2)
-                cv2.line(cv_image, bottomLeft, topLeft, (0, 255, 0), 2)
+        corners, ids, rejected = detector.detectMarkers(cv_image)
+
+        
+        if ids is not None and len(ids) > 0:
+            cv2.aruco.drawDetectedMarkers(cv_image, corners, ids)
 
         else:
+            # rospy.loginfo("Rejected markers: %s",len(rejected))
             if rejected is not None and len(rejected) > 0:
                 rospy.loginfo("Rejected markers: %s",len(rejected))
                 for r in rejected:
@@ -81,7 +71,7 @@ class ImageSub:
         cv2.imshow("Image window", cv_image)
         cv2.waitKey(3)
         try:
-            self.pub_image.publish(self.bridge.cv2_to_imgmsg(cv_image,"passthrough"))
+            self.pub_image.publish(self.bridge.cv2_to_imgmsg(cv_image,self.encoding_type))
         except CvBridgeError as e:
             rospy.logwarn(e)
 

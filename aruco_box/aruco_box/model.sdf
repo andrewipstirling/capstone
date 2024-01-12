@@ -40,7 +40,7 @@
           <geometry>
             <mesh>
                 <uri>model://aruco_box/model.dae</uri>
-                <scale>0.02 0.02 0.02</scale>
+                <scale>0.1 0.1 0.1</scale>
             </mesh>
           </geometry>
         </visual>
