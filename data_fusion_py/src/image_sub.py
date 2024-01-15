@@ -165,7 +165,7 @@ def main():
     const = np.ones_like(total_distance[:,0])
     plt.subplot(2,1,1)
     plt.plot(total_distance[:,0],color='red',linestyle='-',label='x')
-    plt.plot(-0.1*const,color='red',linestyle='--')
+    plt.plot(0.1*const,color='red',linestyle='--')
     plt.plot(total_distance[:,1],color='blue',linestyle='-',label='y')
     plt.plot(0.1*const,color='blue',linestyle='--')
     plt.plot(total_distance[:,2],color='green',linestyle='-',label='z')
