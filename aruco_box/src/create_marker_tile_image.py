@@ -15,10 +15,12 @@ class MarkerFactory:
         # white background
         img = 255 * np.ones((size, size), dtype=np.uint8)
         # img_marker = aruco.drawMarker(aruco_dict, id, size - 2 * margin,borderBits=1)
-        img_marker = aruco.generateImageMarker(aruco_dict, id, size - 2 * margin,borderBits=1)
+        img_marker = aruco.generateImageMarker(aruco_dict, id, size - 2 * margin)
         # add marker centered
         img[margin:-margin, margin:-margin] = img_marker
 
+        print("Marker Size: ", img_marker.size)
+        # Marker Size scaled by 0.02
         return img
 
 
@@ -47,7 +49,7 @@ class TileMap:
 @click.argument("path", type=click.Path(exists=True))
 @click.option("--tile_size", type=int, default=100)
 def main(path, tile_size):
-    margin = int(0.3 * tile_size)
+    margin = int(0.1 * tile_size)
 
     marker_factory = MarkerFactory()
     tile_map = TileMap(tile_size)
@@ -56,7 +58,7 @@ def main(path, tile_size):
 
     ids = []
 
-    marker_id = 0
+    marker_id = 1
     for i in range(4):
         for j in range(3):
             if i != 1 and (j==0  or j == 2):
