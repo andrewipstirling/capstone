@@ -81,7 +81,7 @@ def main(path, tile_size):
     marker_config = dict(zip(order, ids))
 
     config = dict()
-    config["aruco_dict"] = "5X5_50"
+    config["aruco_dict"] = "6X6_250"
     config["markers"] = marker_config
 
     with open(os.path.join(path, "marker_info.yml"), "w") as yml_file:

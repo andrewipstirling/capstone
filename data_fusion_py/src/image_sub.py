@@ -79,7 +79,7 @@ class ImageSub:
         
         if ids is not None and len(ids) > 0:
             cv2.aruco.drawDetectedMarkers(cv_image, corners, ids)
-            rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners,0.04,
+            rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners,0.032,
                                                                   self.cv_cam_mat,
                                                                   self.cv_dist_coeffs)
             if len(ids) == 2:
@@ -170,6 +170,8 @@ def main():
     plt.plot(0.1*const,color='blue',linestyle='--')
     plt.plot(total_distance[:,2],color='green',linestyle='-',label='z')
     plt.plot(0.0*const,color='green',linestyle='--')
+    plt.title('Marker Position in Reference Frame')
+    plt.ylabel('Position [m]')
     plt.legend()
 
     plt.subplot(2,1,2)
@@ -179,9 +181,28 @@ def main():
     plt.plot(0*const,color='blue',linestyle='--')
     plt.plot(total_rot[:,2],color='green',linestyle='-',label='yaw')
     plt.plot(0.0*const,color='green',linestyle='--')
+    plt.title('Marker Rotation in Reference Frame')
+    plt.ylabel('Angular Displacement [deg]')
     plt.tight_layout()
     plt.legend()
-    
+    plt.savefig("figs/marker_pos.png")
+    plt.show()
+
+    plt.subplot(2,1,1)
+    plt.plot(total_distance[:,0]-0.1,color='red',linestyle='-',label='x error')
+    plt.plot(total_distance[:,1]-0.1,color='blue',linestyle='-',label='y error')
+    plt.plot(total_distance[:,2],color='green',linestyle='-',label='z error')
+    plt.title('Absolute Error')
+    plt.ylabel('[m]')
+    plt.legend()
+
+    plt.subplot(2,1,2)
+    plt.plot((total_distance[:,0]-0.1)*100/0.1,color='red',linestyle='-',label='x error')
+    plt.plot((total_distance[:,1]-0.1)*100/0.1,color='blue',linestyle='-',label='y error')
+    plt.title("Relative Error")
+    plt.ylabel('[%]')
+    plt.legend()
+    plt.savefig("figs/marker_error.png")
     plt.show()
     return
 

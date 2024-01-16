@@ -48,3 +48,19 @@ After launching, following topics are available:
 - /pi_camera/image_raw/theora/parameter_updates
 - /pi_camera/parameter_descriptions
 - /pi_camera/parameter_updates
+
+To start tracking, open second terminal, re-source workspace and run
+```
+rosrun data_fusion_py image_sub.py
+```
+### Preliminary Results
+
+View of Simulation
+![](figs/gazebo_sim.png)
+
+View of Tracking
+![](figs/gazebo_tracking.png)
+
+Plots
+![](figs/marker_pos.png)
+![](figs/marker_error.png)

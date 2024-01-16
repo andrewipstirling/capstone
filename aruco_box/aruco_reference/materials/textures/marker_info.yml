@@ -1,4 +1,4 @@
-aruco_dict: 5X5_50
+aruco_dict: 6X6_250
 markers:
   back: 1
   botton: 1
