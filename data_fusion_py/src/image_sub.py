@@ -59,7 +59,7 @@ class ImageSub:
         try:
             cv_image = self.bridge.imgmsg_to_cv2(self.img_msg,desired_encoding=self.encoding_type)
             # cv_image = cv2.transpose(cv_image)
-            cv_image = cv2.flip(cv_image,0)
+            # cv_image = cv2.flip(cv_image,1)
             # cv_image = cv2.rotate(cv_image,cv2.ROTATE_90_COUNTERCLOCKWISE)
         except CvBridgeError as e:
             rospy.logwarn(e)
@@ -79,7 +79,7 @@ class ImageSub:
         
         if ids is not None and len(ids) > 0:
             cv2.aruco.drawDetectedMarkers(cv_image, corners, ids)
-            rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners,0.032,
+            rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners,0.04,
                                                                   self.cv_cam_mat,
                                                                   self.cv_dist_coeffs)
             if len(ids) == 2:
@@ -158,16 +158,19 @@ def main():
         image_sub.update()
     cv2.destroyAllWindows()
     # Plotting 
+    
     total_distance, total_rot = image_sub.get_dist()
     total_distance = np.array(total_distance).reshape((-1,3))
     total_rot = np.array(total_rot).reshape((-1,3))
     t = np.linspace(0,len(total_distance))
     const = np.ones_like(total_distance[:,0])
+    const_x = 0.15 * const
+    const_y = 0.1 * const
     plt.subplot(2,1,1)
     plt.plot(total_distance[:,0],color='red',linestyle='-',label='x')
-    plt.plot(0.1*const,color='red',linestyle='--')
+    plt.plot(const_x,color='red',linestyle='--')
     plt.plot(total_distance[:,1],color='blue',linestyle='-',label='y')
-    plt.plot(0.1*const,color='blue',linestyle='--')
+    plt.plot(const_y,color='blue',linestyle='--')
     plt.plot(total_distance[:,2],color='green',linestyle='-',label='z')
     plt.plot(0.0*const,color='green',linestyle='--')
     plt.title('Marker Position in Reference Frame')
@@ -185,25 +188,25 @@ def main():
     plt.ylabel('Angular Displacement [deg]')
     plt.tight_layout()
     plt.legend()
-    plt.savefig("figs/marker_pos.png")
     plt.show()
+    plt.savefig("/home/astirl/Documents/capstone/figs/marker_pos.png")
 
     plt.subplot(2,1,1)
-    plt.plot(total_distance[:,0]-0.1,color='red',linestyle='-',label='x error')
-    plt.plot(total_distance[:,1]-0.1,color='blue',linestyle='-',label='y error')
+    plt.plot(total_distance[:,0]-const_x,color='red',linestyle='-',label='x error')
+    plt.plot(total_distance[:,1]-const_y,color='blue',linestyle='-',label='y error')
     plt.plot(total_distance[:,2],color='green',linestyle='-',label='z error')
     plt.title('Absolute Error')
     plt.ylabel('[m]')
     plt.legend()
 
     plt.subplot(2,1,2)
-    plt.plot((total_distance[:,0]-0.1)*100/0.1,color='red',linestyle='-',label='x error')
-    plt.plot((total_distance[:,1]-0.1)*100/0.1,color='blue',linestyle='-',label='y error')
+    plt.plot((total_distance[:,0]-const_x)*100/0.1,color='red',linestyle='-',label='x error')
+    plt.plot((total_distance[:,1]-const_y)*100/0.1,color='blue',linestyle='-',label='y error')
     plt.title("Relative Error")
     plt.ylabel('[%]')
     plt.legend()
-    plt.savefig("figs/marker_error.png")
     plt.show()
+    plt.savefig("/home/astirl/Documents/capstone/figs/marker_error.png")
     return
 
 if __name__ == "__main__":

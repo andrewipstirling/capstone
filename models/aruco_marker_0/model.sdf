@@ -25,7 +25,8 @@
           <script>
             <uri>model://aruco_marker_0/materials/scripts</uri>
             <uri>model://aruco_marker_0/materials/textures</uri>
-            <name>Aruco Marker 0</name>
+            <name>marker_0</name>
+            <scale>1 1 1</scale>
           </script>
         </material>
       </visual>

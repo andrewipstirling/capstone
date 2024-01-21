@@ -87,57 +87,9 @@
       <elevation>0</elevation>
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
-    <model name='aruco_box'>
-      <pose>0 0 0.025 0 0 0</pose>
-      <link name='link'>
-        <inertial>
-          <mass>1</mass>
-          <inertia>
-            <ixx>0.166667</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.166667</iyy>
-            <iyz>0</iyz>
-            <izz>0.166667</izz>
-          </inertia>
-          <pose>0 0 0 0 -0 0</pose>
-        </inertial>
-        <collision name='collision'>
-          <geometry>
-            <box>
-              <size>0.05 0.05 0.05</size>
-            </box>
-          </geometry>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-          <max_contacts>10</max_contacts>
-        </collision>
-        <visual name='aruco_box_mesh'>
-          <geometry>
-            <mesh>
-              <uri>model://aruco_box/model.dae</uri>
-              <scale>0.02 0.02 0.02</scale>
-            </mesh>
-          </geometry>
-        </visual>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-    </model>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>-1.94917 -0.004487 2.38262 0 0.891611 -0.008</pose>
+        <pose>1.96352 0.007957 1.61338 -0 0.559611 3.12</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -146,7 +98,7 @@
       <pose>0 0 1 0 1.57079 0</pose>
       <static>1</static>
       <link name='camera_link'>
-        <pose>0 0 0 0 0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <inertial>
           <mass>0.1</mass>
           <inertia>
@@ -226,27 +178,52 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <model name='aruco_reference'>
-      <pose>-0.1 0.1 0.025 0 -0 0</pose>
+    <model name='aruco_marker_1'>
       <link name='link'>
         <inertial>
-          <mass>1</mass>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.001</mass>
           <inertia>
-            <ixx>0.166667</ixx>
+            <ixx>3.75e-06</ixx>
             <ixy>0</ixy>
             <ixz>0</ixz>
-            <iyy>0.166667</iyy>
+            <iyy>1.875e-06</iyy>
             <iyz>0</iyz>
-            <izz>0.166667</izz>
+            <izz>1.875e-06</izz>
           </inertia>
-          <pose>0 0 0 0 -0 0</pose>
         </inertial>
-        <collision name='collision'>
+        <visual name='front_visual'>
+          <pose>5e-05 0 0 0 -0 0</pose>
           <geometry>
             <box>
-              <size>0.05 0.05 0.05</size>
+              <size>0.0001 0.05 0.05</size>
             </box>
           </geometry>
+          <material>
+            <script>
+              <uri>model://aruco_marker_1/materials/scripts</uri>
+              <uri>model://aruco_marker_1/materials/textures</uri>
+              <name>marker_1</name>
+              <scale>1 1 1</scale>
+            </script>
+          </material>
+        </visual>
+        <visual name='rear_visual'>
+          <pose>-5e-05 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0001 0.05 0.05</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0001 0.05 0.05</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
           <surface>
             <contact>
               <ode/>
@@ -259,20 +236,126 @@
               <ode/>
             </friction>
           </surface>
-          <max_contacts>10</max_contacts>
         </collision>
-        <visual name='aruco_box_mesh'>
-          <geometry>
-            <mesh>
-              <uri>model://aruco_reference/model.dae</uri>
-              <scale>0.02 0.02 0.02</scale>
-            </mesh>
-          </geometry>
-        </visual>
         <self_collide>0</self_collide>
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
+      <pose>-0.096753 -0.824372 0 0 -0 0</pose>
     </model>
+    <model name='aruco_marker_0'>
+      <link name='link'>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.001</mass>
+          <inertia>
+            <ixx>3.75e-06</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>1.875e-06</iyy>
+            <iyz>0</iyz>
+            <izz>1.875e-06</izz>
+          </inertia>
+        </inertial>
+        <visual name='front_visual'>
+          <pose>5e-05 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0001 0.05 0.05</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://aruco_marker_0/materials/scripts</uri>
+              <uri>model://aruco_marker_0/materials/textures</uri>
+              <name>marker_0</name>
+              <scale>1 1 1</scale>
+            </script>
+          </material>
+        </visual>
+        <visual name='rear_visual'>
+          <pose>-5e-05 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0001 0.05 0.05</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name='collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.0001 0.05 0.05</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>-0.084414 -0.584421 0 0 -0 0</pose>
+    </model>
+    <state world_name='default'>
+      <sim_time>203 572000000</sim_time>
+      <real_time>204 655485238</real_time>
+      <wall_time>1705876650 931167221</wall_time>
+      <iterations>203572</iterations>
+      <model name='aruco_marker_0'>
+        <pose>-0 0 5e-05 3.14159 -1.57079 3.14159</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-0 0 5e-05 3.14159 -1.57079 3.14159</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>-0 -0 -0 0 -0 0</acceleration>
+          <wrench>-0 -0 -0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='aruco_marker_1'>
+        <pose>0.1 0.15 5e-05 3.14159 -1.57079 3.14159</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>0.1 0.15 5e-05 3.14159 -1.57079 3.14159</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='distorted_camera'>
+        <pose>0 0 1 0 1.57079 0</pose>
+        <scale>1 1 1</scale>
+        <link name='camera_link'>
+          <pose>0 0 1 0 1.57079 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='ground_plane'>
+        <pose>0 0 0 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>0 0 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <light name='sun'>
+        <pose>0 0 10 0 -0 0</pose>
+      </light>
+    </state>
   </world>
 </sdf>
