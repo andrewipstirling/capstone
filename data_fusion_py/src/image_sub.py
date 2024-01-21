@@ -188,8 +188,9 @@ def main():
     plt.ylabel('Angular Displacement [deg]')
     plt.tight_layout()
     plt.legend()
-    plt.show()
     plt.savefig("/home/astirl/Documents/capstone/figs/marker_pos.png")
+    plt.show()
+    
 
     plt.subplot(2,1,1)
     plt.plot(total_distance[:,0]-const_x,color='red',linestyle='-',label='x error')
@@ -205,8 +206,9 @@ def main():
     plt.title("Relative Error")
     plt.ylabel('[%]')
     plt.legend()
-    plt.show()
     plt.savefig("/home/astirl/Documents/capstone/figs/marker_error.png")
+    plt.show()
+    
     return
 
 if __name__ == "__main__":

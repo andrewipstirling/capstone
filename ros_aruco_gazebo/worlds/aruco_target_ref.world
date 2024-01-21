@@ -89,7 +89,7 @@
     </spherical_coordinates>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>1.96352 0.007957 1.61338 -0 0.559611 3.12</pose>
+        <pose>1.98254 0.228735 1.59063 -0 0.559611 3.12</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -309,18 +309,18 @@
       <pose>-0.084414 -0.584421 0 0 -0 0</pose>
     </model>
     <state world_name='default'>
-      <sim_time>203 572000000</sim_time>
-      <real_time>204 655485238</real_time>
-      <wall_time>1705876650 931167221</wall_time>
-      <iterations>203572</iterations>
+      <sim_time>330 210000000</sim_time>
+      <real_time>127 354358397</real_time>
+      <wall_time>1705877728 937613402</wall_time>
+      <iterations>126638</iterations>
       <model name='aruco_marker_0'>
         <pose>-0 0 5e-05 3.14159 -1.57079 3.14159</pose>
         <scale>1 1 1</scale>
         <link name='link'>
           <pose>-0 0 5e-05 3.14159 -1.57079 3.14159</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-0 -0 -0 0 -0 0</acceleration>
-          <wrench>-0 -0 -0 0 -0 0</wrench>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='aruco_marker_1'>
@@ -329,8 +329,8 @@
         <link name='link'>
           <pose>0.1 0.15 5e-05 3.14159 -1.57079 3.14159</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>-0 0 0 -0 -0 -0</acceleration>
+          <wrench>-0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='distorted_camera'>
