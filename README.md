@@ -26,6 +26,13 @@ catkin init
 ln -s $tmp_var/capstone/ros_aruco_gazebo src
 ```
 
+### Add models to path
+Add the models folder to the **GAZEBO_MODEL_PATH** environment variable. To add to *.bashrc* use 
+```
+cd ~
+echo "export GAZEBO_MODEL_PATH=$GAZEBO_RESOURCE_PATH:~/path_to_captsone/capstone/models/" >> .bashrc
+```
+
 ## Running Simulation (1 Camera + 1 Tag)
 ```
 catkin build
