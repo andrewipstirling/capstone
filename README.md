@@ -2,9 +2,10 @@
 
 ## Dependencies
 
-Ubuntu 20.04+  \
+Ubuntu 20.04  \
 ROS Noetic: http://wiki.ros.org/noetic/Installation/Ubuntu  \
-catkin_tools: https://catkin-tools.readthedocs.io/en/latest/installing.html#installing-on-ubuntu-with-apt-get
+catkin_tools: https://catkin-tools.readthedocs.io/en/latest/installing.html#installing-on-ubuntu-with-apt-get \
+OpenCV 4.9.0
 
 ## Installation Steps
 
