@@ -9,5 +9,6 @@
   <depend>rospy</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
+  <depend>gazebo_msgs</depend>
   <depend>cv_bridge</depend>
 </package>

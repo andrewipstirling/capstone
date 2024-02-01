@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>ros_aruco_gazebo</name>
+  <version>0.1.0</version>
+  <description>Simple world for aruco box and camera</description>
+  <maintainer email="andrew.stirling2@mail.mcgill.ca">Andrew Stirling</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+</package>

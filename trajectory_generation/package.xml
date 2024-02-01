@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>trajectory_generation</name>
+  <version>0.1.0</version>
+  <description>Package for controlling movement</description>
+  <maintainer email="andrew.stirling2@mail.mcgill.ca">Andrew Stirling</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>gazebo_msgs</depend>
+</package>

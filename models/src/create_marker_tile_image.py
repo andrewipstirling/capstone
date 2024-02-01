@@ -21,7 +21,7 @@ class MarkerFactory:
 
         print("Marker Size: ", img_marker.size)
         # Marker Size scaled by 0.02
-        return img
+        return img.T
 
 
 class TileMap:
@@ -47,7 +47,7 @@ class TileMap:
 
 @click.command()
 @click.argument("path", type=click.Path(exists=True))
-@click.option("--tile_size", type=int, default=100)
+@click.option("--tile_size", type=int, default=250)
 def main(path, tile_size):
     margin = int(0.1 * tile_size)
 
@@ -57,7 +57,8 @@ def main(path, tile_size):
     order = ['left', 'botton', 'front', 'top' , 'back', 'right']
 
     ids = []
-
+    # Reference = 1
+    # True = 0
     marker_id = 1
     for i in range(4):
         for j in range(3):

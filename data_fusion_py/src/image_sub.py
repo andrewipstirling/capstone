@@ -7,11 +7,13 @@ from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
+from gazebo_msgs.msg import ModelStates
 
 
 class ImageSub:
     # Class initialize
     def __init__(self) -> None:
+        self.show_image = False
         self.img_msg = None
         
         self.bridge = CvBridge()
@@ -40,7 +42,24 @@ class ImageSub:
         
         self.pub_image = rospy.Publisher('data_fusion/cv_image',Image,queue_size=1)
 
+        self.ref_state = None
+        self.ref_ori = None
+        self.total_ref_state = []
+
+        self.sub = rospy.Subscriber('/gazebo/model_states',ModelStates,self.pose_cb)
+
         rospy.loginfo("Succesfully connected")
+
+    def pose_cb(self, model_state_msg: ModelStates) -> None:
+        if len(model_state_msg.pose)>0:
+        
+            pos = model_state_msg.pose[2].position
+            ori = model_state_msg.pose[2].orientation
+            rospy.loginfo_throttle(5,"True Position: %s", pos)
+
+            self.ref_state = [pos.x,pos.y,pos.z]
+            self.ref_ori = [ori]
+            # self.ref_state.append([])
     
     def image_cb(self, img_msg: Image) -> None:
         # rospy.loginfo(img_msg.header)
@@ -108,6 +127,7 @@ class ImageSub:
                 
                 self.total_distance.append(self.rel_trans)
                 self.total_rot.append(self.rel_rot)
+                self.total_ref_state.append(self.ref_state)
             else:
                 rospy.logwarn_throttle(5, "Could not find two markers")
 
@@ -126,9 +146,10 @@ class ImageSub:
         # (rows,cols,channels) = cv_image.shape
         # if cols > 60 and rows > 60 :
         #     cv2.circle(cv_image, (50,50), 10, 255)
-    
-        cv2.imshow("Image Window", cv_image)
-        cv2.waitKey(3)
+        if(self.show_image):
+            cv2.imshow("Image Window", cv_image)
+            cv2.waitKey(3)
+        
         try:
             self.pub_image.publish(self.bridge.cv2_to_imgmsg(cv_image,self.encoding_type))
         except CvBridgeError as e:
@@ -164,26 +185,28 @@ def main():
     total_rot = np.array(total_rot).reshape((-1,3))
     t = np.linspace(0,len(total_distance))
     const = np.ones_like(total_distance[:,0])
-    const_x = 0.15 * const
-    const_y = 0.1 * const
+    true_distance = np.array(image_sub.total_ref_state).reshape((-1,3))
+    true_x = -true_distance[:,1]
+    true_y = -true_distance[:,0]
+    true_z = true_distance[:,2] - 0.025
     plt.subplot(2,1,1)
-    plt.plot(total_distance[:,0],color='red',linestyle='-',label='x')
-    plt.plot(const_x,color='red',linestyle='--')
-    plt.plot(total_distance[:,1],color='blue',linestyle='-',label='y')
-    plt.plot(const_y,color='blue',linestyle='--')
-    plt.plot(total_distance[:,2],color='green',linestyle='-',label='z')
-    plt.plot(0.0*const,color='green',linestyle='--')
+    plt.plot(total_distance[:,0],color='red',linestyle='--',label='ref x')
+    plt.plot(true_x,color='red',linestyle='-',label='true x')
+    plt.plot(total_distance[:,1],color='blue',linestyle='--',label='ref y')
+    plt.plot(true_y,color='blue',linestyle='-',label='true y')
+    plt.plot(total_distance[:,2],color='green',linestyle='--',label='ref z')
+    plt.plot(true_z,color='green',linestyle='-',label='true z')
     plt.title('Marker Position in Reference Frame')
     plt.ylabel('Position [m]')
     plt.legend()
 
     plt.subplot(2,1,2)
-    plt.plot(total_rot[:,0],color='red',linestyle='-',label='roll')
-    plt.plot(0*const,color='red',linestyle='--')
-    plt.plot(total_rot[:,1],color='blue',linestyle='-',label='pitch')
-    plt.plot(0*const,color='blue',linestyle='--')
-    plt.plot(total_rot[:,2],color='green',linestyle='-',label='yaw')
-    plt.plot(0.0*const,color='green',linestyle='--')
+    # plt.plot(total_rot[:,0],color='red',linestyle='--',label='roll')
+    plt.plot(0*const,color='red',linestyle='-')
+    # plt.plot(total_rot[:,1],color='blue',linestyle='--',label='pitch')
+    plt.plot(0*const,color='blue',linestyle='-')
+    # plt.plot(total_rot[:,2],color='green',linestyle='--',label='yaw')
+    plt.plot(0.0*const,color='green',linestyle='-')
     plt.title('Marker Rotation in Reference Frame')
     plt.ylabel('Angular Displacement [deg]')
     plt.tight_layout()
@@ -193,16 +216,16 @@ def main():
     
 
     plt.subplot(2,1,1)
-    plt.plot(total_distance[:,0]-const_x,color='red',linestyle='-',label='x error')
-    plt.plot(total_distance[:,1]-const_y,color='blue',linestyle='-',label='y error')
+    plt.plot(total_distance[:,0]-true_x,color='red',linestyle='-',label='x error')
+    plt.plot(total_distance[:,1]-true_y,color='blue',linestyle='-',label='y error')
     plt.plot(total_distance[:,2],color='green',linestyle='-',label='z error')
     plt.title('Absolute Error')
     plt.ylabel('[m]')
     plt.legend()
 
     plt.subplot(2,1,2)
-    plt.plot((total_distance[:,0]-const_x)*100/0.1,color='red',linestyle='-',label='x error')
-    plt.plot((total_distance[:,1]-const_y)*100/0.1,color='blue',linestyle='-',label='y error')
+    plt.plot((total_distance[:,0]-true_x)*100/true_x[0],color='red',linestyle='-',label='x error')
+    plt.plot((total_distance[:,1]-true_y)*100/true_y[0],color='blue',linestyle='-',label='y error')
     plt.title("Relative Error")
     plt.ylabel('[%]')
     plt.legend()

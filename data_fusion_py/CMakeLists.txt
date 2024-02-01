@@ -37,6 +37,7 @@ catkin_package(
     rospy
     std_msgs
     sensor_msgs
+    gazebo_msgs
     cv_bridge
   DEPENDS 
 )
@@ -53,6 +54,7 @@ include_directories(
     ${OpenCV_INCLUDE_DIRS}
 )
 
-catkin_install_python(PROGRAMS src/image_sub.py
+catkin_install_python(PROGRAMS 
+  src/image_sub.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

@@ -2,6 +2,7 @@
 <sdf version="1.5">
 
  <model name='aruco_reference'>
+      <static>1</static>
       <pose>0 0 0 0 -0 0</pose>
       <link name='link'>
         <inertial>
@@ -40,7 +41,7 @@
           <geometry>
             <mesh>
                 <uri>model://aruco_reference/model.dae</uri>
-                <scale>0.02 0.02 0.02</scale>
+                <scale>0.025 0.025 0.025</scale>
             </mesh>
           </geometry>
         </visual>
