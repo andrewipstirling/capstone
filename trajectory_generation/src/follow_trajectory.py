@@ -1,7 +1,10 @@
 import rospy
 import numpy as np
 from gazebo_msgs.msg import ModelState
+from gazebo_msgs.msg import ModelStates
 from gazebo_msgs.srv import SetModelState
+
+PUBRATE = 10
 
 class PubTraj:
     
@@ -10,66 +13,79 @@ class PubTraj:
         rospy.loginfo("Setting up follow_trajectory node")
         rospy.logerr("Starting node")
         self.pub_msg = None
-        self.start_x = 0.12
-        self.start_y = 0.15
-        self.start_z = 0.025
 
         self.end_x = -0.12
-        self.end_y = 0.151
-        self.end_z = 0.0251
-        self.x = np.arange(self.start_x,self.end_x,-1e-3,)
-        self.y = np.arange(self.start_y,self.end_y,1e-3)
-        self.z = np.arange(self.start_z,self.end_z,1e-3)
+        self.end_y = 0.15
+        self.end_z = 0.025
+        self.end = np.array([self.end_x,self.end_y,self.end_z])
+        
+
+        self.time_to_move = 10
+        self.pub_rate = PUBRATE
+        self.traj = None
 
         
-        
-        self.max_count = max([len(self.x),len(self.y),len(self.z)])
+        self.max_count = None
         self.orientation_traj = None
 
         self.count = 0
         self.model_msg = ModelState()
         self.pub = rospy.Publisher('/gazebo/set_model_state', ModelState, queue_size=1)
 
+        self.sub = rospy.Subscriber('/gazebo/model_states',ModelStates,self.pose_cb)
+        self.has_start = False
+
         rospy.loginfo("Succesfully connected with follow_trajectory node")
         rospy.loginfo("Publishing trajectory of \'aruco_box\' model...")
         
+    def pose_cb(self, model_state_msg: ModelStates) -> None:
+        if not self.has_start:
+            if len(model_state_msg.pose)>0:
+                pos = model_state_msg.pose[2].position
+                self.start_x = pos.x
+                self.start_y = pos.y
+                self.start_z = pos.z
+                self.has_start = True
+                self.create_traj()
+
+    def create_traj(self):
+        self.start = np.array([self.start_x,self.start_y,self.start_z])
+
+        self.traj = np.linspace(self.start,self.end,self.pub_rate * self.time_to_move)
+        self.max_count = len(self.traj)
 
     def update(self):
+        done = False
+        if self.has_start :
+            self.model_msg.model_name = 'aruco_box'
 
-        self.model_msg.model_name = 'aruco_box'
+            if self.count < self.max_count:
+                rospy.loginfo("Sending state")
+                self.model_msg.pose.position.x = self.traj[self.count][0]
+                self.model_msg.pose.position.y = self.traj[self.count][1]
+                self.model_msg.pose.position.z = self.traj[self.count][2]
 
-        if self.count < self.max_count:
-            rospy.loginfo("Sending state")
-            self.model_msg.pose.position.x = self.x[self.count]
-            self.model_msg.pose.position.y = self.y[0]
-            self.model_msg.pose.position.z = self.z[0]
+                self.pub.publish(self.model_msg)
+                self.count += 1
 
-            self.pub.publish(self.model_msg)
-            self.count += 1
-            # rospy.wait_for_service('/gazebo/set_model_state', SetModelState)
-            # try: 
-            #     set_state = rospy.ServiceProxy('/gazebo/model_state', SetModelState)
-            #     response = set_state(self.model_msg)
+            else:
+                done = True
+            
+        return done
                 
-            # except rospy.ServiceException as err:
-            #     rospy.logerr("Service call failed: %s", err)
-                
-
-
-
-    
 def main():
     rospy.init_node('publish_trajectory', anonymous=True, log_level=rospy.INFO)
 
     traj_pub = PubTraj()
 
-    rate = rospy.Rate(10)
+    rate = rospy.Rate(PUBRATE)
 
     while not rospy.is_shutdown():
-        traj_pub.update()
-        
+        done = traj_pub.update()
         rate.sleep()
-
+        if done:
+            rospy.loginfo("Finished trajectory, Shutting Down")
+            rospy.signal_shutdown(reason="Finished Trajectory")
 
     return
 

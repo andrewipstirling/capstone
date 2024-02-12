@@ -57,9 +57,9 @@ def main(path, tile_size):
     order = ['left', 'botton', 'front', 'top' , 'back', 'right']
 
     ids = []
-    # Reference = 1
-    # True = 0
-    marker_id = 1
+    reference_marker = 6
+    true_marker = 0
+    marker_id = reference_marker #true_marker
     for i in range(4):
         for j in range(3):
             if i != 1 and (j==0  or j == 2):
@@ -69,7 +69,7 @@ def main(path, tile_size):
             tile_map.set_tile((i, j), marker_img)
             ids.append(marker_id)
 
-            # marker_id += 1
+            marker_id += 1
 
     tile_img = tile_map.get_map_image()
 
