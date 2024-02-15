@@ -19,6 +19,7 @@ class PubTraj:
         self.end_z = 0.025
         self.end = np.array([self.end_x,self.end_y,self.end_z])
         
+        
 
         self.time_to_move = 10
         self.pub_rate = PUBRATE
@@ -42,10 +43,12 @@ class PubTraj:
         if not self.has_start:
             if len(model_state_msg.pose)>0:
                 pos = model_state_msg.pose[2].position
+                ori = model_state_msg.pose[2].orientation
                 self.start_x = pos.x
                 self.start_y = pos.y
                 self.start_z = pos.z
                 self.has_start = True
+                self.orientation_traj = ori
                 self.create_traj()
 
     def create_traj(self):
@@ -64,6 +67,10 @@ class PubTraj:
                 self.model_msg.pose.position.x = self.traj[self.count][0]
                 self.model_msg.pose.position.y = self.traj[self.count][1]
                 self.model_msg.pose.position.z = self.traj[self.count][2]
+                self.model_msg.pose.orientation.x = self.orientation_traj.x
+                self.model_msg.pose.orientation.y = self.orientation_traj.y
+                self.model_msg.pose.orientation.z = self.orientation_traj.z
+                self.model_msg.pose.orientation.w = self.orientation_traj.w
 
                 self.pub.publish(self.model_msg)
                 self.count += 1

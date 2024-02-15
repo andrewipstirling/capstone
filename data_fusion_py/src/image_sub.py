@@ -48,6 +48,7 @@ class ImageSub:
         self.gazebo_pos = None
         self.gazebo_ori = None
         self.total_ref_state = []
+        self.total_gazebo_ori = []
 
         self.sub = rospy.Subscriber('/gazebo/model_states',ModelStates,self.pose_cb)
 
@@ -92,12 +93,13 @@ class ImageSub:
         if len(model_state_msg.pose)>0:
         
             pos = model_state_msg.pose[2].position
-            ori = model_state_msg.pose[2].orientation
+            ori_quat = model_state_msg.pose[2].orientation
+            ori = np.array([ori_quat.x,ori_quat.y,ori_quat.z,ori_quat.w])
             rospy.loginfo_throttle(5,"True Position: %s", pos)
-
+            
             self.gazebo_pos = [pos.x,pos.y,pos.z]
-            self.gazebo_ori = [ori]
-            # self.ref_state.append([])
+            # self.gazebo_ori = R.from_quat(ori).as_euler('xyz',degrees=True)
+
     
     def image_cb(self, img_msg: Image) -> None:
         # rospy.loginfo(img_msg.header)
@@ -216,6 +218,7 @@ class ImageSub:
                 self.total_stddev.append(self.std_dev)
                 self.total_rot.append(self.rel_rot)
                 self.total_ref_state.append(self.gazebo_pos)
+                # self.total_gazebo_ori.append(self.gazebo_ori)
 
             else:
                 rospy.logwarn_throttle(5, "Could not find any markers")
@@ -273,6 +276,7 @@ def main():
     t = np.linspace(0,len(total_distance))
     const = np.ones_like(total_distance[:,0])
     true_distance = np.array(image_sub.total_ref_state)
+    true_orientation = np.array(image_sub.total_gazebo_ori)
     x = total_distance[:,1].flatten()
     y = total_distance[:,0].flatten()
     z = total_distance[:,2].flatten()
@@ -296,11 +300,11 @@ def main():
 
     plt.subplot(2,1,2)
     plt.plot(total_rot[:,0],color='red',linestyle='--',label='roll')
-    plt.plot(0*const,color='red',linestyle='-')
+    # plt.plot(true_orientation[:,0],color='red',linestyle='-')
     plt.plot(total_rot[:,1],color='blue',linestyle='--',label='pitch')
-    plt.plot(0*const,color='blue',linestyle='-')
+    # plt.plot(true_orientation[:,1],color='blue',linestyle='-')
     plt.plot(total_rot[:,2],color='green',linestyle='--',label='yaw')
-    plt.plot(0.0*const,color='green',linestyle='-')
+    # plt.plot(true_orientation[:,2],color='green',linestyle='-')
     plt.title('Marker Rotation in Reference Frame')
     plt.ylabel('Angular Displacement [deg]')
     plt.xlabel('Frames')
@@ -316,7 +320,7 @@ def main():
     x_err_rel = x_err / np.abs(true_x)
     y_err_rel = y_err / np.abs(true_y)
     std_dev = np.array(image_sub.total_stddev)
-    plt.subplot(3,1,1)
+    plt.subplot(2,1,1)
     plt.tight_layout()
     plt.plot(x_err,color='red',linestyle='-',label='x error')
     plt.plot(y_err,color='blue',linestyle='-',label='y error')
@@ -326,15 +330,15 @@ def main():
     plt.xlabel('Frames')
     plt.legend(loc='upper right')
 
-    plt.subplot(3,1,2)
-    plt.plot(x_err_rel,color='red',linestyle='-',label='x error')
-    plt.plot(y_err_rel,color='blue',linestyle='-',label='y error')
-    plt.title("Relative Error")
-    plt.ylabel('[%]')
-    plt.xlabel('Frames')
-    plt.legend(loc='upper right')
+    # plt.subplot(3,1,2)
+    # plt.plot(x_err_rel,color='red',linestyle='-',label='x error')
+    # plt.plot(y_err_rel,color='blue',linestyle='-',label='y error')
+    # plt.title("Relative Error")
+    # plt.ylabel('[%]')
+    # plt.xlabel('Frames')
+    # plt.legend(loc='upper right')
 
-    plt.subplot(3,1,3)
+    plt.subplot(2,1,2)
     plt.plot(std_dev[:,0],color='red',linestyle='-',label='x std dev')
     plt.plot(std_dev[:,1],color='blue',linestyle='-',label='y std dev')
     plt.plot(std_dev[:,2],color='green',linestyle='-',label='z std dev')
