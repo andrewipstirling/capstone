@@ -68,7 +68,7 @@ class ImageSub:
             [[m,c,-m],[m,c,m],[-m,c,m],[-m,c,-m]], # ID: 4/10
             [[-c,m,-m],[-c,m,m],[-c,-m,m],[-c,-m,-m]]],dtype=np.float32) # ID: 5/11
         
-        print(self.board_points,self.board_points.shape)
+        # print(self.board_points,self.board_points.shape)
         # Create reference and target boards
         self.ref_board = cv2.aruco.Board(self.board_points,self.aruco_dict,self.ref_board_ids)
         self.target_board = cv2.aruco.Board(self.board_points,self.aruco_dict,self.target_board_ids)
