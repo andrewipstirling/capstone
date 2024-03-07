@@ -70,8 +70,12 @@ class pose_estimation:
         as numpy matrix representing the rotation of target relative to reference.
         """
         if ids is not None and len(ids) > 0:
-            ref_obj_pts, ref_img_pts = cv2.aruco.getBoardObjectAndImagePoints(reference_board,corners,ids)
-            target_obj_pts, target_img_pts = cv2.aruco.getBoardObjectAndImagePoints(target_board,corners,ids)
+            ref_obj_pts, ref_img_pts = reference_board.matchImagePoints(corners,ids)
+            target_obj_pts, target_img_pts = target_board.matchImagePoints(corners,ids)
+
+            # Deprecated
+            # ref_obj_pts, ref_img_pts = cv2.aruco.getBoardObjectAndImagePoints(reference_board,corners,ids)
+            # target_obj_pts, target_img_pts = cv2.aruco.getBoardObjectAndImagePoints(target_board,corners,ids)
 
             if self.prev_target_tvec is not None:
                 # Estimate pose of Reference board
