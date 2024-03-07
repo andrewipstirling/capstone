@@ -16,7 +16,6 @@ class ImageSub:
     def __init__(self) -> None:
         self.show_image = False
         self.img_msg = None
-        
         self.bridge = CvBridge()
         self.cv_img_in = None
         self.cv_img_out = None
@@ -87,7 +86,7 @@ class ImageSub:
         self.target_rvel = None
         self.target_corners = None
         self.target_ids = None
-        rospy.loginfo("Succesfully connected")
+        rospy.loginfo("Succesfully connected" + cv2.__version__)
 
     def pose_cb(self, model_state_msg: ModelStates) -> None:
         if len(model_state_msg.pose)>0:
@@ -131,6 +130,9 @@ class ImageSub:
         # self.filter_corners(corners,ids)
         
         if ids is not None and len(ids) > 0:
+            # ref_obj_pts, ref_img_pts  = self.ref_board.matchImagePoints(corners,ids)
+            # target_obj_pts, target_img_pts = self.target_board.matchImagePoints(corners,ids)
+
             ref_obj_pts, ref_img_pts = cv2.aruco.getBoardObjectAndImagePoints(self.ref_board,corners,ids)
             target_obj_pts, target_img_pts = cv2.aruco.getBoardObjectAndImagePoints(self.target_board,corners,ids)
 
@@ -213,6 +215,7 @@ class ImageSub:
                 rospy.loginfo_throttle(5,"Tool Pose: \n translation=%s \n rotation=%s", 
                                     self.rel_trans, self.rel_rot)
                 rospy.loginfo_throttle(5,"Standard Deviation [x, y, z]: %s \n", self.std_dev[0:3])
+                rospy.loginfo_throttle(5,cv2.__version__)
                 
                 self.total_distance.append(self.rel_trans)
                 self.total_stddev.append(self.std_dev)
