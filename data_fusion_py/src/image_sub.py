@@ -130,11 +130,12 @@ class ImageSub:
         # self.filter_corners(corners,ids)
         
         if ids is not None and len(ids) > 0:
-            # ref_obj_pts, ref_img_pts  = self.ref_board.matchImagePoints(corners,ids)
-            # target_obj_pts, target_img_pts = self.target_board.matchImagePoints(corners,ids)
-
-            ref_obj_pts, ref_img_pts = cv2.aruco.getBoardObjectAndImagePoints(self.ref_board,corners,ids)
-            target_obj_pts, target_img_pts = cv2.aruco.getBoardObjectAndImagePoints(self.target_board,corners,ids)
+            ref_obj_pts, ref_img_pts  = self.ref_board.matchImagePoints(corners,ids)
+            target_obj_pts, target_img_pts = self.target_board.matchImagePoints(corners,ids)
+            
+            # Deprecated 
+            # ref_obj_pts, ref_img_pts = cv2.aruco.getBoardObjectAndImagePoints(self.ref_board,corners,ids)
+            # target_obj_pts, target_img_pts = cv2.aruco.getBoardObjectAndImagePoints(self.target_board,corners,ids)
 
             if self.prev_target_tvec is not None:
                 # ref_val, ref_rvec, ref_tvec = cv2.aruco.estimatePoseBoard(corners,ids,self.ref_board,self.cv_cam_mat,
