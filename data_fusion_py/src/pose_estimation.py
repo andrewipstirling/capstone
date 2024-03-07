@@ -5,10 +5,15 @@ from scipy.spatial.transform import Rotation as R
 
 class pose_estimation:
     
-    def __init__(self):
+    def __init__(self, framerate=75):
         # OpenCV Stuff
-        self.camera_matrix = None
-        self.dist_coeffs = None
+        self.camera_matrix = np.array([[2919.7999500495794, 0.0, 728.5], 
+                                       [0.0, 2919.7999500495794, 544.5],
+                                        [ 0.0, 0.0, 1.0]])
+        self.cv_cam_mat = cv2.Mat(self.camera_matrix)
+        self.dist_coeffs = np.array([[0.0, 0.0, 0.0, 0.0, 0.0]
+])
+        self.cv_dist_coeffs = cv2.Mat(self.dist_coeffs)
         self.image = None
         self.marker_length = 0.04 # Side length of marker (currently set at 4cm)
         
@@ -16,10 +21,11 @@ class pose_estimation:
         self.m = self.marker_length/2 # half of marker length
         self.c = 0.05/2 # half of cube length
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_100)
+        self.objectPoints = np.array([[-self.m, self.m, 0], [self.m, self.m, 0], [self.m, -self.m, 0], [-self.m, -self.m, 0]])
         
         # Pose Estimation Variables
         # Check this !!
-        self.frame_rate = 75
+        self.frame_rate = framerate
         # Time between each frame
         self.dt = 1 / self.frame_rate
         self.prev_ref_rvec = None
@@ -149,9 +155,22 @@ class pose_estimation:
         rel_rot_matrix: Relative orientation between target and reference marker in world frame
                         stored as numpy matrix representing the rotation of target relative to reference.
         """
-        rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners,self.marker_length,
-                                                              self.camera_matrix,
-                                                              self.dist_coeffs)
+        # rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners,self.marker_length,
+        #                                                       self.camera_matrix,
+        #                                                       self.dist_coeffs)
+        
+        if ids is None: return None, None
+        
+        N_markers = len(ids)
+        rvecs = np.zeros((N_markers, 3, 1))
+        tvecs = np.zeros((N_markers, 3, 1))
+        
+        for i in range(N_markers):
+            imagePoints = np.ascontiguousarray(corners[i]).reshape((4,1,2))
+            retval, rvecs[i], tvecs[i] = cv2.solvePnP(self.objectPoints, imagePoints, self.cv_cam_mat, self.cv_dist_coeffs, flags=cv2.SOLVEPNP_IPPE_SQUARE)
+        
+        # retval, rvecs, tvecs = cv2.solvePnP(self.objectPoints, np.ascontiguousarray(corners).reshape((-1,4,1,2)), self.cv_cam_mat, self.cv_dist_coeffs, flags=cv2.SOLVEPNP_IPPE_SQUARE)
+        
         # If found less/more than 2 markers, return None
         if len(ids) == 2:
             # Target/Tool marker found first
@@ -186,7 +205,7 @@ class pose_estimation:
             return rel_trans, rel_rot_matrix
             
         else:
-            return None
+            return None, None
                 
                 
     

@@ -1,11 +1,10 @@
-import numpy as np
-import cv2 as cv
+import cv2
 # import cv2.aruco
 
 # Host command: rpicam-vid -t 0 -n --inline --framerate 60 --intra 1 -o - | gst-launch-1.0 fdsrc fd=0 ! h264parse ! rtph264pay pt=96 ! udpsink host=192.168.5.2 port=5000 sync=false
-# cap = cv.VideoCapture("udpsrc address=192.168.100.101 port=5000 caps=application/x-rtp ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! video/x-raw, format=BGR ! appsink max-buffers=1 drop=true", cv.CAP_GSTREAMER)
-cap = cv.VideoCapture("udpsrc address=192.168.5.2 port=5000 ! application/x-rtp, clock-rate=90000, payload=96 ! rtph264depay ! h264parse ! avdec_h264 discard-corrupted-frames=true skip-frame=1 ! videoconvert ! video/x-raw, format=BGR ! appsink max-buffers=1 drop=true sync=false", cv.CAP_GSTREAMER)
-# cap = cv.VideoCapture("videotestsrc ! autovideoconvert ! appsink", cv.CAP_GSTREAMER)
+# cap = cv2.VideoCapture("udpsrc address=192.168.100.101 port=5000 caps=application/x-rtp ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! video/x-raw, format=BGR ! appsink max-buffers=1 drop=true", cv2.CAP_GSTREAMER)
+cap = cv2.VideoCapture("udpsrc address=192.168.5.2 port=5000 ! application/x-rtp, clock-rate=90000, payload=96 ! rtph264depay ! h264parse ! avdec_h264 discard-corrupted-frames=true skip-frame=1 ! videoconvert ! video/x-raw, format=BGR ! appsink max-buffers=1 drop=true sync=false", cv2.CAP_GSTREAMER)
+# cap = cv2.VideoCapture("videotestsrc ! autovideoconvert ! appsink", cv2.CAP_GSTREAMER)
 
 if not cap.isOpened():
     print("Cannot open camera")
@@ -18,13 +17,13 @@ while True:
         print("Can't receive frame (stream end?). Exiting ...")
         break
     # Our operations on the frame come here
-    # gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+    # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # Display the resulting frame
-    cv.imshow('frame', frame)
-    if cv.waitKey(1) == ord('q'):
+    cv2.imshow('frame', frame)
+    if cv2.waitKey(1) == ord('q'):
         break
 # When everything done, release the capture
 cap.release()
-cv.destroyAllWindows()
+cv2.destroyAllWindows()
 
-# print(cv.getBuildInformation())
+# print(cv2.getBuildInformation())
