@@ -1,7 +1,21 @@
-# To launch video stream
+# Connect to camera/board X
+ssh nist@camX.local
+password: groupx
+
+# Launch video stream
 rpicam-vid -t 0 -n --inline --framerate 60 --intra 1 -o - | gst-launch-1.0 fdsrc fd=0 ! h264parse ! rtph264pay pt=96 ! udpsink host=192.168.5.2 port=5000 sync=false
 
-# To set static ip
-nmcli c mod 'Wired connection 1' ipv4.addresses 192.168.5.3/24 ipv4.method manual
+# Set static ip to 192.168.5.10X where X is the camera/board number
+sudo nmcli c mod 'Wired connection 1' ipv4.addresses 192.168.5.10X/24 ipv4.method manual
 sudo nmcli con mod 'Wired connection 1' ipv4.gateway 192.168.5.1
 sudo nmcli c down 'Wired connection 1' && sudo nmcli c up 'Wired connection 1'
+
+# Install necessary packages
+sudo apt-get install libx264-dev libjpeg-dev
+sudo apt-get install libgstreamer1.0-dev \
+     libgstreamer-plugins-base1.0-dev \
+     libgstreamer-plugins-bad1.0-dev \
+     gstreamer1.0-plugins-ugly \
+     gstreamer1.0-tools \
+     gstreamer1.0-gl \
+     gstreamer1.0-gtk3 
