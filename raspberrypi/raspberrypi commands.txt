@@ -1,0 +1,7 @@
+# To launch video stream
+rpicam-vid -t 0 -n --inline --framerate 60 --intra 1 -o - | gst-launch-1.0 fdsrc fd=0 ! h264parse ! rtph264pay pt=96 ! udpsink host=192.168.5.2 port=5000 sync=false
+
+# To set static ip
+nmcli c mod 'Wired connection 1' ipv4.addresses 192.168.5.3/24 ipv4.method manual
+sudo nmcli con mod 'Wired connection 1' ipv4.gateway 192.168.5.1
+sudo nmcli c down 'Wired connection 1' && sudo nmcli c up 'Wired connection 1'
