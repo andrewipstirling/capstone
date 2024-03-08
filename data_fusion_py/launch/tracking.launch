@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<launch>
+    <!-- Launch your ROS node -->
+    <node pkg="data_fusion_py" type="image_sub.py" name="pose_estimator" output="screen">
+        <!-- Add any arguments your node script requires -->
+        <!-- For example: <param name="param_name" value="param_value"/> -->
+    </node>
+</launch>
