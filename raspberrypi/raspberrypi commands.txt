@@ -11,11 +11,4 @@ sudo nmcli con mod 'Wired connection 1' ipv4.gateway 192.168.5.1
 sudo nmcli c down 'Wired connection 1' && sudo nmcli c up 'Wired connection 1'
 
 # Install necessary packages
-sudo apt-get install libx264-dev libjpeg-dev
-sudo apt-get install libgstreamer1.0-dev \
-     libgstreamer-plugins-base1.0-dev \
-     libgstreamer-plugins-bad1.0-dev \
-     gstreamer1.0-plugins-ugly \
-     gstreamer1.0-tools \
-     gstreamer1.0-gl \
-     gstreamer1.0-gtk3 
+sudo apt-get install gstreamer1.0-tools
