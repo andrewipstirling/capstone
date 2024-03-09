@@ -19,6 +19,7 @@ find_package(catkin REQUIRED
     std_msgs
     sensor_msgs
     cv_bridge
+    message_generation
 )
 
 ###################################
@@ -33,14 +34,17 @@ find_package(catkin REQUIRED
 catkin_package(
   INCLUDE_DIRS       
   LIBRARIES
+    data_fusion_py
   CATKIN_DEPENDS
     rospy
     std_msgs
     sensor_msgs
     gazebo_msgs
     cv_bridge
+    message_runtime
   DEPENDS 
 )
+
 
 ###########
 ## Build ##
@@ -51,10 +55,18 @@ catkin_package(
 include_directories(
 	include
 	${catkin_INCLUDE_DIRS}
-    ${OpenCV_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 catkin_install_python(PROGRAMS 
   src/image_sub.py
+  src/util/pose_estimation.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+add_message_files(
+  FILES
+  PoseEstimate.msg
+)
+
+catkin_python_setup()

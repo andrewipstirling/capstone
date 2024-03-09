@@ -11,4 +11,6 @@
   <depend>sensor_msgs</depend>
   <depend>gazebo_msgs</depend>
   <depend>cv_bridge</depend>
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
 </package>
