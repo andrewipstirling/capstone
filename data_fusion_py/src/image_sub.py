@@ -279,6 +279,10 @@ class ImageSub:
 
 def main():
     image_sub_1 = ImageSub(sub_topic_name='/pi_camera_1/image_raw',pub_topic_name='/pi_camera_1/pose_estimate')
+    image_sub_2 = ImageSub(sub_topic_name='/pi_camera_2/image_raw',pub_topic_name='/pi_camera_2/pose_estimate')
+    image_sub_3 = ImageSub(sub_topic_name='/pi_camera_3/image_raw',pub_topic_name='/pi_camera_3/pose_estimate')
+    image_sub_4 = ImageSub(sub_topic_name='/pi_camera_4/image_raw',pub_topic_name='/pi_camera_4/pose_estimate')
+
 
     rospy.init_node('image_fusion', anonymous=True)
     # Run at 10 Hz
@@ -286,6 +290,10 @@ def main():
 
     while not rospy.is_shutdown():
         image_sub_1.update()
+        image_sub_2.update()
+        image_sub_3.update()
+        image_sub_4.update()
+        
     cv2.destroyAllWindows()
     # Plotting 
     if PLOTTING:
