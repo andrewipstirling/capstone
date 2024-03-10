@@ -18,12 +18,12 @@ while True:
         break
     
     corners, ids, rejected = detector.detectMarkers(frame)
-    rel_trans, rel_rot = poseEstimator.estimate_pose_marker(corners,ids, 0)
-    print(f'Translation: {rel_trans}, Rotation: {rel_rot}')
+    # rel_trans, rel_rot = poseEstimator.estimate_pose_marker(corners,ids, 0)
+    # print(f'Translation: {rel_trans}, Rotation: {rel_rot}')
     
     overlayImg = cv2.aruco.drawDetectedMarkers(frame, corners, ids)
     cv2.imshow('frame', overlayImg)
-    if cv2.waitKey(1) == ord('q'):
+    if cv2.pollKey() == ord('q'):
         break
 
 cap.release()
