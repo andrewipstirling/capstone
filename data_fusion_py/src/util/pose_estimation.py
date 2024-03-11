@@ -7,12 +7,11 @@ class pose_estimation:
     
     def __init__(self, framerate=75):
         # OpenCV Stuff
-        self.camera_matrix = np.array([[2919.7999500495794, 0.0, 728.5], 
-                                       [0.0, 2919.7999500495794, 544.5],
-                                        [ 0.0, 0.0, 1.0]])
+        self.camera_matrix = np.array([[1.56842921e+03, 0, 2.89275503e+02], 
+                                       [0, 1.57214434e+03, 2.21092150e+02], 
+                                       [0, 0, 1]])
         self.cv_cam_mat = cv2.Mat(self.camera_matrix)
-        self.dist_coeffs = np.array([[0.0, 0.0, 0.0, 0.0, 0.0]
-])
+        self.dist_coeffs = np.array([[ 2.28769970e-02, -4.54632281e+00, -3.04424079e-03, -2.06207084e-03, 9.30400565e+01]])
         self.cv_dist_coeffs = cv2.Mat(self.dist_coeffs)
         self.image = None
         self.marker_length = 0.04 # Side length of marker (currently set at 4cm)
