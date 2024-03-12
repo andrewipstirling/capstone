@@ -113,7 +113,8 @@ class pose_estimation:
                 # Relative Translation Calculation
                 # Go from object coordinates to world coordinates
                 # T_{t//r} = T_{c//r} + (-T_{c//t})
-                rel_trans = ref_tvec - target_tvec
+                rel_trans = ref_tvec - target_tvec  # Camera's reference frame
+                rel_trans = ref_rot_mat.T @ rel_trans  # Reference's reference frame
                 
                 # Reative orientation calculation
                 # Put into matrix form, return rotation matrix and jacobian of rotation matrix
@@ -127,7 +128,7 @@ class pose_estimation:
                 # R_{t//r} = R_{t//c} @ R_{c//r}
                 # As Matrix
                 rel_rot_matrix = target_rot_mat.T @ ref_rot_mat
-                rel_trans_fix = ref_rot_mat.T @ rel_trans
+                
                 # As roll-pitch-yaw (rpy) vector 
                 rel_rot_rpy = R.from_matrix(rel_rot_matrix).as_euler('xyz',degrees=True)
 
@@ -137,7 +138,7 @@ class pose_estimation:
                 std_dev = np.sqrt(np.diag(np.abs(sigma)))
                 
                 
-            return rel_trans_fix, ref_rot_mat, std_dev, ref_tvec
+            return rel_trans, ref_rot_mat, std_dev, ref_tvec
         
         else: 
             return None, None, None, None
