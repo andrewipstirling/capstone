@@ -137,10 +137,10 @@ class pose_estimation:
                 std_dev = np.sqrt(np.diag(np.abs(sigma)))
                 
                 
-            return rel_trans_fix, ref_rot_mat, std_dev
+            return rel_trans_fix, ref_rot_mat, std_dev, ref_tvec
         
         else: 
-            return None, None, None
+            return None, None, None, None
 
         
         
