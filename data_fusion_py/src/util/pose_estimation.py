@@ -14,13 +14,13 @@ class pose_estimation:
         self.dist_coeffs = np.array([[ 2.28769970e-02, -4.54632281e+00, -3.04424079e-03, -2.06207084e-03, 9.30400565e+01]])
         self.cv_dist_coeffs = cv2.Mat(self.dist_coeffs)
         self.image = None
-        self.marker_length = 0.04 # Side length of marker (currently set at 4cm)
+        # self.marker_length = 0.04 # Side length of marker (currently set at 4cm)
         
         # Board Information
-        self.m = self.marker_length/2 # half of marker length
-        self.c = 0.05/2 # half of cube length
+        # self.m = self.marker_length/2 # half of marker length
+        # self.c = 0.05/2 # half of cube length
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_100)
-        self.objectPoints = np.array([[-self.m, self.m, 0], [self.m, self.m, 0], [self.m, -self.m, 0], [-self.m, -self.m, 0]])
+        # self.objectPoints = np.array([[-self.m, self.m, 0], [self.m, self.m, 0], [self.m, -self.m, 0], [-self.m, -self.m, 0]])
         
         # Pose Estimation Variables
         # Check this !!
@@ -68,7 +68,7 @@ class pose_estimation:
         Relative orientation between target and reference marker in world frame stored
         as numpy matrix representing the rotation of target relative to reference.
         """
-        if ids is not None and len(ids) > 0:
+        if ids is not None and len(ids) == 2:
             ref_obj_pts, ref_img_pts = reference_board.matchImagePoints(corners,ids)
             target_obj_pts, target_img_pts = target_board.matchImagePoints(corners,ids)
 
@@ -121,12 +121,13 @@ class pose_estimation:
                 ref_rot_mat, _= cv2.Rodrigues(ref_rvec)
                 target_rot_mat = np.array(target_rot_mat)
                 ref_rot_mat = np.array(ref_rot_mat)
-
+                
+                
                 # solvePnp returns rotation of camera relative to marker !!
                 # R_{t//r} = R_{t//c} @ R_{c//r}
                 # As Matrix
                 rel_rot_matrix = target_rot_mat.T @ ref_rot_mat
-
+                rel_trans_fix = ref_rot_mat.T @ rel_trans
                 # As roll-pitch-yaw (rpy) vector 
                 rel_rot_rpy = R.from_matrix(rel_rot_matrix).as_euler('xyz',degrees=True)
 
@@ -136,7 +137,10 @@ class pose_estimation:
                 std_dev = np.sqrt(np.diag(np.abs(sigma)))
                 
                 
-            return rel_trans, ref_rot_mat, std_dev
+            return rel_trans_fix, ref_rot_mat, std_dev
+        
+        else: 
+            return None, None, None
 
         
         
