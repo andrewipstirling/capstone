@@ -4,7 +4,7 @@ import numpy as np
   
 cap = cv2.VideoCapture("udpsrc address=192.168.5.2 port=5000 ! application/x-rtp, clock-rate=90000, payload=96 ! rtph264depay ! h264parse ! avdec_h264 discard-corrupted-frames=true skip-frame=1 ! videoconvert ! video/x-raw, format=BGR ! appsink max-buffers=1 drop=true sync=false", cv2.CAP_GSTREAMER)
 
-poseEstimator = pose_estimation.pose_estimation(framerate=60)
+poseEstimator = pose_estimation.pose_estimation(framerate=60, plotting=True)
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_100)
 arucoParams = cv2.aruco.DetectorParameters()
 detector = cv2.aruco.ArucoDetector(poseEstimator.aruco_dict, arucoParams)
@@ -45,3 +45,8 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
+
+# poseEstimator.plot(trueTrans=[-155.2, 0, 0], trueRot=[0, 0, 0])
+poseEstimator.plot()
+avgPos = np.average(poseEstimator.total_distance, axis=0)
+print(f'Avg X: {avgPos[0]}, Y: {avgPos[1]}, Z: {avgPos[2]}')

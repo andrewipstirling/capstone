@@ -6,6 +6,7 @@ password: groupx
 rpicam-vid -t 0 -n --inline --framerate 60 --intra 1 --level 4.2 --profile high --bitrate 100000000 --denoise cdn_off -o - | gst-launch-1.0 fdsrc fd=0 ! h264parse ! rtph264pay pt=96 ! udpsink host=192.168.5.2 port=5000 sync=false
 
 
+### SETUP ###
 # Set static ip to 192.168.5.10X where X is the camera/board number
 sudo nmcli c mod 'Wired connection 1' ipv4.addresses 192.168.5.10X/24 ipv4.method manual
 sudo nmcli con mod 'Wired connection 1' ipv4.gateway 192.168.5.1
