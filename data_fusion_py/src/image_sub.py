@@ -29,6 +29,9 @@ class ImageSub:
         self.camera_matrix = np.array([[2919.7999500495794, 0.0, 728.5], 
                                        [0.0, 2919.7999500495794, 544.5],
                                         [ 0.0, 0.0, 1.0]])
+        
+        
+        
         self.cv_cam_mat = cv2.Mat(self.camera_matrix)
         self.dist_coeffs = np.array([[0.0, 0.0, 0.0, 0.0, 0.0]
 ])
@@ -55,11 +58,12 @@ class ImageSub:
         self.total_gazebo_ori = []
 
         self.sub = rospy.Subscriber('/gazebo/model_states',ModelStates,self.pose_cb)
-
+        
         # Board Information
         m = 0.04/2 # half of marker length
         c = 0.05/2 # half of cube length
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_100)
+        
         
         self.target_board_ids = np.array([0,1,2,3,4,5])
         self.ref_board_ids = np.array([6,7,8,9,10,11])
@@ -74,6 +78,7 @@ class ImageSub:
         
         # print(self.board_points,self.board_points.shape)
         # Create reference and target boards
+        
         self.ref_board = cv2.aruco.Board(self.board_points,self.aruco_dict,self.ref_board_ids)
         self.target_board = cv2.aruco.Board(self.board_points,self.aruco_dict,self.target_board_ids)
 
@@ -256,8 +261,8 @@ class ImageSub:
                 self.std_dev = np.sqrt(np.diag(np.abs(sigma)))
 
                 
-                
-                rospy.loginfo_throttle(5,"Tool Pose: \n translation=%s \n rotation=%s", 
+                rospy.loginfo_throttle(5, "Information from: %s" ,self.sub_topic_name.split('/')[1])
+                rospy.loginfo_throttle(5,"Pose: \n translation=%s \n rotation=%s", 
                                     self.rel_trans, self.rel_rot)
                 rospy.loginfo_throttle(5,"Standard Deviation [x, y, z]: %s \n", self.std_dev[0:3])
                 if PLOTTING:
