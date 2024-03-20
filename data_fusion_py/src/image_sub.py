@@ -13,7 +13,7 @@ from cv_bridge import CvBridge, CvBridgeError
 from gazebo_msgs.msg import ModelStates
 import geometry_msgs
 
-PUBRATE = 10
+PUBRATE = 60
 PLOTTING = False
 
 class ImageSub:
@@ -217,7 +217,13 @@ class ImageSub:
                 self.prev_target_rvec = target_rvec
                 self.prev_target_tvec = target_tvec
                 
-
+            ref_rvec, ref_tvec = cv2.solvePnPRefineLM(ref_obj_pts,ref_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
+                                                      ref_rvec,ref_tvec,)
+            
+            target_rvec, target_tvec = cv2.solvePnPRefineLM(target_obj_pts,target_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
+                                                            target_rvec,target_tvec)
+            
+            
             self.ref_tvel = (ref_tvec - self.prev_ref_tvec) / self.dt 
             self.ref_rvel = (ref_rvec - self.prev_ref_rvec) / self.dt
 
@@ -252,7 +258,8 @@ class ImageSub:
                 # R_{t//r} = R_{t//c} @ R_{c//r}
                 self.rel_rot_mat = target_rot_mat.T @ ref_rot_mat
 
-                self.rel_rot = R.from_matrix(self.rel_rot_mat).as_euler('xyz',degrees=True)
+                # Yaw, Pitch, Roll
+                self.rel_rot = R.from_matrix(self.rel_rot_mat).as_euler('ZYX',degrees=True)
 
                 _ , tar_jacobian = cv2.projectPoints(target_obj_pts,target_rvec,target_tvec,self.cv_cam_mat,self.cv_dist_coeffs)
 
@@ -262,7 +269,7 @@ class ImageSub:
 
                 
                 rospy.loginfo_throttle(5, "Information from: %s" ,self.sub_topic_name.split('/')[1])
-                rospy.loginfo_throttle(5,"Pose: \n translation=%s \n rotation=%s", 
+                rospy.loginfo_throttle(5,"Pose: \n translation=%s \n rotation [yaw, pitch, roll]=%s", 
                                     self.rel_trans, self.rel_rot)
                 rospy.loginfo_throttle(5,"Standard Deviation [x, y, z]: %s \n", self.std_dev[0:3])
                 if PLOTTING:
@@ -273,6 +280,7 @@ class ImageSub:
                 # self.total_gazebo_ori.append(self.gazebo_ori)
 
             else:
+                
                 rospy.logwarn_throttle(5, "Could not find any markers")
                 self.estimated_pose_success = 0 # False
                 self.rel_trans, self.rel_rot_mat, self.std_dev = np.zeros((3,1)),np.zeros((3,3)),np.zeros((6,1))
