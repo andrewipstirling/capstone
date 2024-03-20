@@ -346,7 +346,10 @@ LSB_RELEASE_EXECUTABLE:FILEPATH=/usr/bin/lsb_release
 NOSETESTS:FILEPATH=/usr/bin/nosetests3
 
 //The directory containing a CMake configuration file for OpenCV.
-OpenCV_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/opencv4
+OpenCV_DIR:PATH=/usr/local/lib/cmake/opencv4
+
+//pkg-config executable
+PKG_CONFIG_EXECUTABLE:FILEPATH=/usr/bin/pkg-config
 
 //Path to a program.
 PYTHON_EXECUTABLE:FILEPATH=/usr/bin/python3
@@ -390,6 +393,30 @@ catkin_DIR:PATH=/opt/ros/noetic/share/catkin/cmake
 //The directory containing a CMake configuration file for cpp_common.
 cpp_common_DIR:PATH=/opt/ros/noetic/share/cpp_common/cmake
 
+//The directory containing a CMake configuration file for cv_bridge.
+cv_bridge_DIR:PATH=/opt/ros/noetic/share/cv_bridge/cmake
+
+//The directory containing a CMake configuration file for gencpp.
+gencpp_DIR:PATH=/opt/ros/noetic/share/gencpp/cmake
+
+//The directory containing a CMake configuration file for geneus.
+geneus_DIR:PATH=/opt/ros/noetic/share/geneus/cmake
+
+//The directory containing a CMake configuration file for genlisp.
+genlisp_DIR:PATH=/opt/ros/noetic/share/genlisp/cmake
+
+//The directory containing a CMake configuration file for genmsg.
+genmsg_DIR:PATH=/opt/ros/noetic/share/genmsg/cmake
+
+//The directory containing a CMake configuration file for gennodejs.
+gennodejs_DIR:PATH=/opt/ros/noetic/share/gennodejs/cmake
+
+//The directory containing a CMake configuration file for genpy.
+genpy_DIR:PATH=/opt/ros/noetic/share/genpy/cmake
+
+//The directory containing a CMake configuration file for geometry_msgs.
+geometry_msgs_DIR:PATH=/opt/ros/noetic/share/geometry_msgs/cmake
+
 //Value Computed by CMake
 gmock_BINARY_DIR:STATIC=/home/astirl/Documents/capstone/build/gtest/googlemock
 
@@ -410,6 +437,18 @@ googletest-distribution_BINARY_DIR:STATIC=/home/astirl/Documents/capstone/build/
 
 //Value Computed by CMake
 googletest-distribution_SOURCE_DIR:STATIC=/usr/src/googletest
+
+//Path to a library.
+gst_LIBRARIES:FILEPATH=/usr/lib/x86_64-linux-gnu/libgstreamer-1.0.so
+
+//Path to a library.
+gstapp_LIBRARIES:FILEPATH=/usr/lib/x86_64-linux-gnu/libgstapp-1.0.so
+
+//Path to a library.
+gstbase_LIBRARIES:FILEPATH=/usr/lib/x86_64-linux-gnu/libgstbase-1.0.so
+
+//Path to a library.
+gstvideo_LIBRARIES:FILEPATH=/usr/lib/x86_64-linux-gnu/libgstvideo-1.0.so
 
 //Value Computed by CMake
 gtest_BINARY_DIR:STATIC=/home/astirl/Documents/capstone/build/gtest/googletest
@@ -437,10 +476,64 @@ gtest_hide_internal_symbols:BOOL=OFF
 gtest_main_LIB_DEPENDS:STATIC=general;gtest;
 
 //Path to a library.
-lib:FILEPATH=/opt/ros/noetic/lib/libxmlrpcpp.so
+lib:FILEPATH=/opt/ros/noetic/lib/libcv_bridge.so
+
+//The directory containing a CMake configuration file for message_generation.
+message_generation_DIR:PATH=/opt/ros/noetic/share/message_generation/cmake
 
 //The directory containing a CMake configuration file for message_runtime.
 message_runtime_DIR:PATH=/opt/ros/noetic/share/message_runtime/cmake
+
+//Path to a library.
+pkgcfg_lib_PC_gst_glib-2.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libglib-2.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gst_gobject-2.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgobject-2.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gst_gstreamer-1.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgstreamer-1.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gstapp_glib-2.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libglib-2.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gstapp_gobject-2.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgobject-2.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gstapp_gstapp-1.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgstapp-1.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gstapp_gstbase-1.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgstbase-1.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gstapp_gstreamer-1.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgstreamer-1.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gstbase_glib-2.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libglib-2.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gstbase_gobject-2.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgobject-2.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gstbase_gstbase-1.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgstbase-1.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gstbase_gstreamer-1.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgstreamer-1.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gstvideo_glib-2.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libglib-2.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gstvideo_gobject-2.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgobject-2.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gstvideo_gstbase-1.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgstbase-1.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gstvideo_gstreamer-1.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgstreamer-1.0.so
+
+//Path to a library.
+pkgcfg_lib_PC_gstvideo_gstvideo-1.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgstvideo-1.0.so
 
 //Value Computed by CMake
 ros_aruco_gazebo_BINARY_DIR:STATIC=/home/astirl/Documents/capstone/build
@@ -468,6 +561,9 @@ rospy_DIR:PATH=/opt/ros/noetic/share/rospy/cmake
 
 //The directory containing a CMake configuration file for rostime.
 rostime_DIR:PATH=/opt/ros/noetic/share/rostime/cmake
+
+//The directory containing a CMake configuration file for sensor_msgs.
+sensor_msgs_DIR:PATH=/opt/ros/noetic/share/sensor_msgs/cmake
 
 //The directory containing a CMake configuration file for std_msgs.
 std_msgs_DIR:PATH=/opt/ros/noetic/share/std_msgs/cmake
@@ -667,9 +763,11 @@ CMAKE_UNAME:INTERNAL=/usr/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 //Details about finding OpenCV
-FIND_PACKAGE_MESSAGE_DETAILS_OpenCV:INTERNAL=[/usr][v4.2.0()]
+FIND_PACKAGE_MESSAGE_DETAILS_OpenCV:INTERNAL=[/usr/local][v4.9.0()]
 //Details about finding PY_em
 FIND_PACKAGE_MESSAGE_DETAILS_PY_em:INTERNAL=[/usr/lib/python3/dist-packages/em.py][v()]
+//Details about finding PkgConfig
+FIND_PACKAGE_MESSAGE_DETAILS_PkgConfig:INTERNAL=[/usr/bin/pkg-config][v0.29.1()]
 //Details about finding PythonInterp
 FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[/usr/bin/python3][v3.8.10()]
 //Details about finding Threads
@@ -702,6 +800,148 @@ GTEST_LIBRARY_DEBUG-ADVANCED:INTERNAL=1
 GTEST_MAIN_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: GTEST_MAIN_LIBRARY_DEBUG
 GTEST_MAIN_LIBRARY_DEBUG-ADVANCED:INTERNAL=1
+PC_gst_CFLAGS:INTERNAL=-pthread;-I/usr/include/gstreamer-1.0;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gst_CFLAGS_I:INTERNAL=
+PC_gst_CFLAGS_OTHER:INTERNAL=-pthread
+PC_gst_FOUND:INTERNAL=1
+PC_gst_INCLUDEDIR:INTERNAL=/usr/include/gstreamer-1.0
+PC_gst_INCLUDE_DIRS:INTERNAL=/usr/include/gstreamer-1.0;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gst_LDFLAGS:INTERNAL=-lgstreamer-1.0;-lgobject-2.0;-lglib-2.0
+PC_gst_LDFLAGS_OTHER:INTERNAL=
+PC_gst_LIBDIR:INTERNAL=/usr/lib/x86_64-linux-gnu
+PC_gst_LIBRARIES:INTERNAL=gstreamer-1.0;gobject-2.0;glib-2.0
+PC_gst_LIBRARY_DIRS:INTERNAL=
+PC_gst_LIBS:INTERNAL=
+PC_gst_LIBS_L:INTERNAL=
+PC_gst_LIBS_OTHER:INTERNAL=
+PC_gst_LIBS_PATHS:INTERNAL=
+PC_gst_MODULE_NAME:INTERNAL=gstreamer-1.0
+PC_gst_PREFIX:INTERNAL=/usr
+PC_gst_STATIC_CFLAGS:INTERNAL=-pthread;-I/usr/include/gstreamer-1.0;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gst_STATIC_CFLAGS_I:INTERNAL=
+PC_gst_STATIC_CFLAGS_OTHER:INTERNAL=-pthread
+PC_gst_STATIC_INCLUDE_DIRS:INTERNAL=/usr/include/gstreamer-1.0;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gst_STATIC_LDFLAGS:INTERNAL=-lgstreamer-1.0;-lgmodule-2.0;-pthread;-ldl;-lgobject-2.0;-pthread;-lffi;-lglib-2.0;-pthread;-lpcre;-pthread
+PC_gst_STATIC_LDFLAGS_OTHER:INTERNAL=-pthread
+PC_gst_STATIC_LIBDIR:INTERNAL=
+PC_gst_STATIC_LIBRARIES:INTERNAL=gstreamer-1.0;gmodule-2.0;dl;gobject-2.0;ffi;glib-2.0;pcre
+PC_gst_STATIC_LIBRARY_DIRS:INTERNAL=
+PC_gst_STATIC_LIBS:INTERNAL=
+PC_gst_STATIC_LIBS_L:INTERNAL=
+PC_gst_STATIC_LIBS_OTHER:INTERNAL=
+PC_gst_STATIC_LIBS_PATHS:INTERNAL=
+PC_gst_VERSION:INTERNAL=1.16.3
+PC_gst_gstreamer-1.0_INCLUDEDIR:INTERNAL=
+PC_gst_gstreamer-1.0_LIBDIR:INTERNAL=
+PC_gst_gstreamer-1.0_PREFIX:INTERNAL=
+PC_gst_gstreamer-1.0_VERSION:INTERNAL=
+PC_gstapp_CFLAGS:INTERNAL=-pthread;-I/usr/include/gstreamer-1.0;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gstapp_CFLAGS_I:INTERNAL=
+PC_gstapp_CFLAGS_OTHER:INTERNAL=-pthread
+PC_gstapp_FOUND:INTERNAL=1
+PC_gstapp_INCLUDEDIR:INTERNAL=/usr/include/gstreamer-1.0
+PC_gstapp_INCLUDE_DIRS:INTERNAL=/usr/include/gstreamer-1.0;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gstapp_LDFLAGS:INTERNAL=-lgstapp-1.0;-lgstbase-1.0;-lgstreamer-1.0;-lgobject-2.0;-lglib-2.0
+PC_gstapp_LDFLAGS_OTHER:INTERNAL=
+PC_gstapp_LIBDIR:INTERNAL=/usr/lib/x86_64-linux-gnu
+PC_gstapp_LIBRARIES:INTERNAL=gstapp-1.0;gstbase-1.0;gstreamer-1.0;gobject-2.0;glib-2.0
+PC_gstapp_LIBRARY_DIRS:INTERNAL=
+PC_gstapp_LIBS:INTERNAL=
+PC_gstapp_LIBS_L:INTERNAL=
+PC_gstapp_LIBS_OTHER:INTERNAL=
+PC_gstapp_LIBS_PATHS:INTERNAL=
+PC_gstapp_MODULE_NAME:INTERNAL=gstreamer-app-1.0
+PC_gstapp_PREFIX:INTERNAL=/usr
+PC_gstapp_STATIC_CFLAGS:INTERNAL=-pthread;-I/usr/include/gstreamer-1.0;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gstapp_STATIC_CFLAGS_I:INTERNAL=
+PC_gstapp_STATIC_CFLAGS_OTHER:INTERNAL=-pthread
+PC_gstapp_STATIC_INCLUDE_DIRS:INTERNAL=/usr/include/gstreamer-1.0;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gstapp_STATIC_LDFLAGS:INTERNAL=-lgstapp-1.0;-lgstbase-1.0;-lgstreamer-1.0;-lgmodule-2.0;-pthread;-ldl;-lgobject-2.0;-pthread;-lffi;-lglib-2.0;-pthread;-lpcre;-pthread
+PC_gstapp_STATIC_LDFLAGS_OTHER:INTERNAL=-pthread
+PC_gstapp_STATIC_LIBDIR:INTERNAL=
+PC_gstapp_STATIC_LIBRARIES:INTERNAL=gstapp-1.0;gstbase-1.0;gstreamer-1.0;gmodule-2.0;dl;gobject-2.0;ffi;glib-2.0;pcre
+PC_gstapp_STATIC_LIBRARY_DIRS:INTERNAL=
+PC_gstapp_STATIC_LIBS:INTERNAL=
+PC_gstapp_STATIC_LIBS_L:INTERNAL=
+PC_gstapp_STATIC_LIBS_OTHER:INTERNAL=
+PC_gstapp_STATIC_LIBS_PATHS:INTERNAL=
+PC_gstapp_VERSION:INTERNAL=1.16.3
+PC_gstapp_gstreamer-app-1.0_INCLUDEDIR:INTERNAL=
+PC_gstapp_gstreamer-app-1.0_LIBDIR:INTERNAL=
+PC_gstapp_gstreamer-app-1.0_PREFIX:INTERNAL=
+PC_gstapp_gstreamer-app-1.0_VERSION:INTERNAL=
+PC_gstbase_CFLAGS:INTERNAL=-pthread;-I/usr/include/gstreamer-1.0;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gstbase_CFLAGS_I:INTERNAL=
+PC_gstbase_CFLAGS_OTHER:INTERNAL=-pthread
+PC_gstbase_FOUND:INTERNAL=1
+PC_gstbase_INCLUDEDIR:INTERNAL=/usr/include/gstreamer-1.0
+PC_gstbase_INCLUDE_DIRS:INTERNAL=/usr/include/gstreamer-1.0;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gstbase_LDFLAGS:INTERNAL=-lgstbase-1.0;-lgstreamer-1.0;-lgobject-2.0;-lglib-2.0
+PC_gstbase_LDFLAGS_OTHER:INTERNAL=
+PC_gstbase_LIBDIR:INTERNAL=/usr/lib/x86_64-linux-gnu
+PC_gstbase_LIBRARIES:INTERNAL=gstbase-1.0;gstreamer-1.0;gobject-2.0;glib-2.0
+PC_gstbase_LIBRARY_DIRS:INTERNAL=
+PC_gstbase_LIBS:INTERNAL=
+PC_gstbase_LIBS_L:INTERNAL=
+PC_gstbase_LIBS_OTHER:INTERNAL=
+PC_gstbase_LIBS_PATHS:INTERNAL=
+PC_gstbase_MODULE_NAME:INTERNAL=gstreamer-base-1.0
+PC_gstbase_PREFIX:INTERNAL=/usr
+PC_gstbase_STATIC_CFLAGS:INTERNAL=-pthread;-I/usr/include/gstreamer-1.0;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gstbase_STATIC_CFLAGS_I:INTERNAL=
+PC_gstbase_STATIC_CFLAGS_OTHER:INTERNAL=-pthread
+PC_gstbase_STATIC_INCLUDE_DIRS:INTERNAL=/usr/include/gstreamer-1.0;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gstbase_STATIC_LDFLAGS:INTERNAL=-lgstbase-1.0;-lgstreamer-1.0;-lgmodule-2.0;-pthread;-ldl;-lgobject-2.0;-pthread;-lffi;-lglib-2.0;-pthread;-lpcre;-pthread
+PC_gstbase_STATIC_LDFLAGS_OTHER:INTERNAL=-pthread
+PC_gstbase_STATIC_LIBDIR:INTERNAL=
+PC_gstbase_STATIC_LIBRARIES:INTERNAL=gstbase-1.0;gstreamer-1.0;gmodule-2.0;dl;gobject-2.0;ffi;glib-2.0;pcre
+PC_gstbase_STATIC_LIBRARY_DIRS:INTERNAL=
+PC_gstbase_STATIC_LIBS:INTERNAL=
+PC_gstbase_STATIC_LIBS_L:INTERNAL=
+PC_gstbase_STATIC_LIBS_OTHER:INTERNAL=
+PC_gstbase_STATIC_LIBS_PATHS:INTERNAL=
+PC_gstbase_VERSION:INTERNAL=1.16.3
+PC_gstbase_gstreamer-base-1.0_INCLUDEDIR:INTERNAL=
+PC_gstbase_gstreamer-base-1.0_LIBDIR:INTERNAL=
+PC_gstbase_gstreamer-base-1.0_PREFIX:INTERNAL=
+PC_gstbase_gstreamer-base-1.0_VERSION:INTERNAL=
+PC_gstvideo_CFLAGS:INTERNAL=-pthread;-I/usr/include/gstreamer-1.0;-I/usr/include/orc-0.4;-I/usr/include/gstreamer-1.0;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gstvideo_CFLAGS_I:INTERNAL=
+PC_gstvideo_CFLAGS_OTHER:INTERNAL=-pthread
+PC_gstvideo_FOUND:INTERNAL=1
+PC_gstvideo_INCLUDEDIR:INTERNAL=/usr/include/gstreamer-1.0
+PC_gstvideo_INCLUDE_DIRS:INTERNAL=/usr/include/gstreamer-1.0;/usr/include/orc-0.4;/usr/include/gstreamer-1.0;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gstvideo_LDFLAGS:INTERNAL=-lgstvideo-1.0;-lgstbase-1.0;-lgstreamer-1.0;-lgobject-2.0;-lglib-2.0
+PC_gstvideo_LDFLAGS_OTHER:INTERNAL=
+PC_gstvideo_LIBDIR:INTERNAL=/usr/lib/x86_64-linux-gnu
+PC_gstvideo_LIBRARIES:INTERNAL=gstvideo-1.0;gstbase-1.0;gstreamer-1.0;gobject-2.0;glib-2.0
+PC_gstvideo_LIBRARY_DIRS:INTERNAL=
+PC_gstvideo_LIBS:INTERNAL=
+PC_gstvideo_LIBS_L:INTERNAL=
+PC_gstvideo_LIBS_OTHER:INTERNAL=
+PC_gstvideo_LIBS_PATHS:INTERNAL=
+PC_gstvideo_MODULE_NAME:INTERNAL=gstreamer-video-1.0
+PC_gstvideo_PREFIX:INTERNAL=/usr
+PC_gstvideo_STATIC_CFLAGS:INTERNAL=-pthread;-I/usr/include/gstreamer-1.0;-I/usr/include/orc-0.4;-I/usr/include/gstreamer-1.0;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gstvideo_STATIC_CFLAGS_I:INTERNAL=
+PC_gstvideo_STATIC_CFLAGS_OTHER:INTERNAL=-pthread
+PC_gstvideo_STATIC_INCLUDE_DIRS:INTERNAL=/usr/include/gstreamer-1.0;/usr/include/orc-0.4;/usr/include/gstreamer-1.0;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PC_gstvideo_STATIC_LDFLAGS:INTERNAL=-lgstvideo-1.0;-lorc-0.4;-lm;-lpthread;-lgstbase-1.0;-lgstreamer-1.0;-lgmodule-2.0;-pthread;-ldl;-lgobject-2.0;-pthread;-lffi;-lglib-2.0;-pthread;-lpcre;-pthread
+PC_gstvideo_STATIC_LDFLAGS_OTHER:INTERNAL=-pthread
+PC_gstvideo_STATIC_LIBDIR:INTERNAL=
+PC_gstvideo_STATIC_LIBRARIES:INTERNAL=gstvideo-1.0;orc-0.4;m;pthread;gstbase-1.0;gstreamer-1.0;gmodule-2.0;dl;gobject-2.0;ffi;glib-2.0;pcre
+PC_gstvideo_STATIC_LIBRARY_DIRS:INTERNAL=
+PC_gstvideo_STATIC_LIBS:INTERNAL=
+PC_gstvideo_STATIC_LIBS_L:INTERNAL=
+PC_gstvideo_STATIC_LIBS_OTHER:INTERNAL=
+PC_gstvideo_STATIC_LIBS_PATHS:INTERNAL=
+PC_gstvideo_VERSION:INTERNAL=1.16.3
+PC_gstvideo_gstreamer-video-1.0_INCLUDEDIR:INTERNAL=
+PC_gstvideo_gstreamer-video-1.0_LIBDIR:INTERNAL=
+PC_gstvideo_gstreamer-video-1.0_PREFIX:INTERNAL=
+PC_gstvideo_gstreamer-video-1.0_VERSION:INTERNAL=
+//ADVANCED property for variable: PKG_CONFIG_EXECUTABLE
+PKG_CONFIG_EXECUTABLE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: PYTHON_EXECUTABLE
 PYTHON_EXECUTABLE-ADVANCED:INTERNAL=1
 //This needs to be in PYTHONPATH when 'setup.py install' is called.
@@ -710,8 +950,24 @@ PYTHON_EXECUTABLE-ADVANCED:INTERNAL=1
 PYTHON_INSTALL_DIR:INTERNAL=lib/python3/dist-packages
 //CMAKE_INSTALL_PREFIX during last run
 _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX:INTERNAL=/usr/local
+__pkg_config_arguments_PC_gst:INTERNAL=REQUIRED;gstreamer-1.0
+__pkg_config_arguments_PC_gstapp:INTERNAL=REQUIRED;gstreamer-app-1.0
+__pkg_config_arguments_PC_gstbase:INTERNAL=REQUIRED;gstreamer-base-1.0
+__pkg_config_arguments_PC_gstvideo:INTERNAL=REQUIRED;gstreamer-video-1.0
+__pkg_config_checked_PC_gst:INTERNAL=1
+__pkg_config_checked_PC_gstapp:INTERNAL=1
+__pkg_config_checked_PC_gstbase:INTERNAL=1
+__pkg_config_checked_PC_gstvideo:INTERNAL=1
 //ADVANCED property for variable: gmock_build_tests
 gmock_build_tests-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: gst_LIBRARIES
+gst_LIBRARIES-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: gstapp_LIBRARIES
+gstapp_LIBRARIES-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: gstbase_LIBRARIES
+gstbase_LIBRARIES-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: gstvideo_LIBRARIES
+gstvideo_LIBRARIES-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: gtest_build_samples
 gtest_build_samples-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: gtest_build_tests
@@ -722,4 +978,39 @@ gtest_disable_pthreads-ADVANCED:INTERNAL=1
 gtest_force_shared_crt-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: gtest_hide_internal_symbols
 gtest_hide_internal_symbols-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gst_glib-2.0
+pkgcfg_lib_PC_gst_glib-2.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gst_gobject-2.0
+pkgcfg_lib_PC_gst_gobject-2.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gst_gstreamer-1.0
+pkgcfg_lib_PC_gst_gstreamer-1.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gstapp_glib-2.0
+pkgcfg_lib_PC_gstapp_glib-2.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gstapp_gobject-2.0
+pkgcfg_lib_PC_gstapp_gobject-2.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gstapp_gstapp-1.0
+pkgcfg_lib_PC_gstapp_gstapp-1.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gstapp_gstbase-1.0
+pkgcfg_lib_PC_gstapp_gstbase-1.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gstapp_gstreamer-1.0
+pkgcfg_lib_PC_gstapp_gstreamer-1.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gstbase_glib-2.0
+pkgcfg_lib_PC_gstbase_glib-2.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gstbase_gobject-2.0
+pkgcfg_lib_PC_gstbase_gobject-2.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gstbase_gstbase-1.0
+pkgcfg_lib_PC_gstbase_gstbase-1.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gstbase_gstreamer-1.0
+pkgcfg_lib_PC_gstbase_gstreamer-1.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gstvideo_glib-2.0
+pkgcfg_lib_PC_gstvideo_glib-2.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gstvideo_gobject-2.0
+pkgcfg_lib_PC_gstvideo_gobject-2.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gstvideo_gstbase-1.0
+pkgcfg_lib_PC_gstvideo_gstbase-1.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gstvideo_gstreamer-1.0
+pkgcfg_lib_PC_gstvideo_gstreamer-1.0-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_gstvideo_gstvideo-1.0
+pkgcfg_lib_PC_gstvideo_gstvideo-1.0-ADVANCED:INTERNAL=1
+prefix_result:INTERNAL=/usr/lib/x86_64-linux-gnu
 

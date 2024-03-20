@@ -13,7 +13,7 @@ from cv_bridge import CvBridge, CvBridgeError
 from gazebo_msgs.msg import ModelStates
 import geometry_msgs
 
-PUBRATE = 10
+PUBRATE = 60
 PLOTTING = False
 
 class ImageSub:
@@ -29,6 +29,9 @@ class ImageSub:
         self.camera_matrix = np.array([[2919.7999500495794, 0.0, 728.5], 
                                        [0.0, 2919.7999500495794, 544.5],
                                         [ 0.0, 0.0, 1.0]])
+        
+        
+        
         self.cv_cam_mat = cv2.Mat(self.camera_matrix)
         self.dist_coeffs = np.array([[0.0, 0.0, 0.0, 0.0, 0.0]
 ])
@@ -55,11 +58,12 @@ class ImageSub:
         self.total_gazebo_ori = []
 
         self.sub = rospy.Subscriber('/gazebo/model_states',ModelStates,self.pose_cb)
-
+        
         # Board Information
         m = 0.04/2 # half of marker length
         c = 0.05/2 # half of cube length
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_100)
+        
         
         self.target_board_ids = np.array([0,1,2,3,4,5])
         self.ref_board_ids = np.array([6,7,8,9,10,11])
@@ -74,6 +78,7 @@ class ImageSub:
         
         # print(self.board_points,self.board_points.shape)
         # Create reference and target boards
+        
         self.ref_board = cv2.aruco.Board(self.board_points,self.aruco_dict,self.ref_board_ids)
         self.target_board = cv2.aruco.Board(self.board_points,self.aruco_dict,self.target_board_ids)
 
@@ -212,7 +217,13 @@ class ImageSub:
                 self.prev_target_rvec = target_rvec
                 self.prev_target_tvec = target_tvec
                 
-
+            ref_rvec, ref_tvec = cv2.solvePnPRefineLM(ref_obj_pts,ref_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
+                                                      ref_rvec,ref_tvec,)
+            
+            target_rvec, target_tvec = cv2.solvePnPRefineLM(target_obj_pts,target_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
+                                                            target_rvec,target_tvec)
+            
+            
             self.ref_tvel = (ref_tvec - self.prev_ref_tvec) / self.dt 
             self.ref_rvel = (ref_rvec - self.prev_ref_rvec) / self.dt
 
@@ -247,7 +258,8 @@ class ImageSub:
                 # R_{t//r} = R_{t//c} @ R_{c//r}
                 self.rel_rot_mat = target_rot_mat.T @ ref_rot_mat
 
-                self.rel_rot = R.from_matrix(self.rel_rot_mat).as_euler('xyz',degrees=True)
+                # Yaw, Pitch, Roll
+                self.rel_rot = R.from_matrix(self.rel_rot_mat).as_euler('ZYX',degrees=True)
 
                 _ , tar_jacobian = cv2.projectPoints(target_obj_pts,target_rvec,target_tvec,self.cv_cam_mat,self.cv_dist_coeffs)
 
@@ -256,8 +268,8 @@ class ImageSub:
                 self.std_dev = np.sqrt(np.diag(np.abs(sigma)))
 
                 
-                
-                rospy.loginfo_throttle(5,"Tool Pose: \n translation=%s \n rotation=%s", 
+                rospy.loginfo_throttle(5, "Information from: %s" ,self.sub_topic_name.split('/')[1])
+                rospy.loginfo_throttle(5,"Pose: \n translation=%s \n rotation [yaw, pitch, roll]=%s", 
                                     self.rel_trans, self.rel_rot)
                 rospy.loginfo_throttle(5,"Standard Deviation [x, y, z]: %s \n", self.std_dev[0:3])
                 if PLOTTING:
@@ -268,6 +280,7 @@ class ImageSub:
                 # self.total_gazebo_ori.append(self.gazebo_ori)
 
             else:
+                
                 rospy.logwarn_throttle(5, "Could not find any markers")
                 self.estimated_pose_success = 0 # False
                 self.rel_trans, self.rel_rot_mat, self.std_dev = np.zeros((3,1)),np.zeros((3,3)),np.zeros((6,1))
