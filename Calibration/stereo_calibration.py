@@ -9,7 +9,8 @@ cams = [1, 2, 3, 4, 5]
 patternSize = (8, 6)
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
-# Camera matrix and distortion coefficients used for both cameras
+# Intrinsic camera matrix and distortion coefficients used for both cameras
+# Code can be edited to accept individual matrices for each camera, or to perform and return new intrinsic calibrations
 cam_mat = cv.Mat(np.array([[1.56842921e+03, 0, 2.89275503e+02], 
                                 [0, 1.57214434e+03, 2.21092150e+02], 
                                 [0, 0, 1]]))
