@@ -18,10 +18,10 @@ ref_board = cv2.aruco.Board(board_points, aruco_dict, np.array([0]))
 target_board = cv2.aruco.Board(board_points, aruco_dict, np.array([1]))
 
 # Dodecahedron board
-dodecaLength = 27.5  # dodecahedron edge length in mm
-dodecaPoints = np.array([[[13.75, -8.575, 61.243], [-13.75, -8.575, 61.243], [-13.75, 18.925, 61.243], [13.75, 18.925, 61.243]],  # ID 0/11
-                         [[13.75, 18.925, 61.243], [-13.75, 18.925, 61.243], [-13.75, 31.224, 36.647], [13.75, 31.224, 36.647]],  # ID 1/12
-                         ],dtype=np.float32)
+# dodecaLength = 27.5  # dodecahedron edge length in mm
+# dodecaPoints = np.array([[[13.75, -8.575, 61.243], [-13.75, -8.575, 61.243], [-13.75, 18.925, 61.243], [13.75, 18.925, 61.243]],  # ID 0/11
+#                          [[13.75, 18.925, 61.243], [-13.75, 18.925, 61.243], [-13.75, 31.224, 36.647], [13.75, 31.224, 36.647]],  # ID 1/12
+#                          ],dtype=np.float32)
 
 if not cap.isOpened():
     print("Cannot open camera")

@@ -39,5 +39,5 @@ for fname in images:
  
 cv.destroyAllWindows()
 
-_, mtx, dist, _, _ = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
+_, mtx, dist, _, _ = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], cam_mat, dist_coeffs)
 print(mtx, dist)
