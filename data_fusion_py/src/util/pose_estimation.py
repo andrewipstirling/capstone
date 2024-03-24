@@ -1,27 +1,34 @@
 import cv2
 import numpy as np
 from scipy.spatial.transform import Rotation as R
+import matplotlib.pyplot as plt
+import time
 
 
 class pose_estimation:
     
-    def __init__(self, framerate=75):
+    def __init__(self, framerate=75, plotting=False):
         # OpenCV Stuff
-        self.camera_matrix = np.array([[2919.7999500495794, 0.0, 728.5], 
-                                       [0.0, 2919.7999500495794, 544.5],
-                                        [ 0.0, 0.0, 1.0]])
+        self.camera_matrix = np.array([[1.56842921e+03, 0, 2.89275503e+02], 
+                                       [0, 1.57214434e+03, 2.21092150e+02], 
+                                       [0, 0, 1]])
         self.cv_cam_mat = cv2.Mat(self.camera_matrix)
-        self.dist_coeffs = np.array([[0.0, 0.0, 0.0, 0.0, 0.0]
-])
+        self.dist_coeffs = np.array([[ 2.28769970e-02, -4.54632281e+00, -3.04424079e-03, -2.06207084e-03, 9.30400565e+01]])
         self.cv_dist_coeffs = cv2.Mat(self.dist_coeffs)
         self.image = None
-        self.marker_length = 0.04 # Side length of marker (currently set at 4cm)
+        # self.marker_length = 0.04 # Side length of marker (currently set at 4cm)
         
         # Board Information
-        self.m = self.marker_length/2 # half of marker length
-        self.c = 0.05/2 # half of cube length
+        # self.m = self.marker_length/2 # half of marker length
+        # self.c = 0.05/2 # half of cube length
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_100)
-        self.objectPoints = np.array([[-self.m, self.m, 0], [self.m, self.m, 0], [self.m, -self.m, 0], [-self.m, -self.m, 0]])
+        # self.objectPoints = np.array([[-self.m, self.m, 0], [self.m, self.m, 0], [self.m, -self.m, 0], [-self.m, -self.m, 0]])
+        
+        # Plotting
+        self.plotting = plotting
+        self.total_distance = []
+        self.total_stddev = []
+        self.total_rot = []
         
         # Pose Estimation Variables
         # Check this !!
@@ -69,7 +76,7 @@ class pose_estimation:
         Relative orientation between target and reference marker in world frame stored
         as numpy matrix representing the rotation of target relative to reference.
         """
-        if ids is not None and len(ids) > 0:
+        if ids is not None and len(ids) == 2:
             ref_obj_pts, ref_img_pts = reference_board.matchImagePoints(corners,ids)
             target_obj_pts, target_img_pts = target_board.matchImagePoints(corners,ids)
 
@@ -111,23 +118,24 @@ class pose_estimation:
             self.prev_target_tvec = target_tvec
 
             if target_val != 0 and ref_val != 0:
-                # Relative Translation Calculation
-                # Go from object coordinates to world coordinates
-                # T_{t//r} = T_{c//r} + (-T_{c//t})
-                rel_trans = ref_tvec - target_tvec
-                
                 # Reative orientation calculation
                 # Put into matrix form, return rotation matrix and jacobian of rotation matrix
                 target_rot_mat, _ = cv2.Rodrigues(target_rvec)
                 ref_rot_mat, _= cv2.Rodrigues(ref_rvec)
                 target_rot_mat = np.array(target_rot_mat)
                 ref_rot_mat = np.array(ref_rot_mat)
-
+                
+                # Relative Translation Calculation
+                # Go from object coordinates to world coordinates
+                # T_{t//r} = T_{c//r} + (-T_{c//t})
+                rel_trans = ref_tvec - target_tvec  # Camera's reference frame
+                rel_trans = ref_rot_mat.T @ rel_trans  # Reference's reference frame
+                
                 # solvePnp returns rotation of camera relative to marker !!
                 # R_{t//r} = R_{t//c} @ R_{c//r}
                 # As Matrix
                 rel_rot_matrix = target_rot_mat.T @ ref_rot_mat
-
+                
                 # As roll-pitch-yaw (rpy) vector 
                 rel_rot_rpy = R.from_matrix(rel_rot_matrix).as_euler('xyz',degrees=True)
 
@@ -136,10 +144,102 @@ class pose_estimation:
                 sigma = np.linalg.inv(np.dot(tar_jacobian.T,tar_jacobian)[0:6,0:6])
                 std_dev = np.sqrt(np.diag(np.abs(sigma)))
                 
+                if self.plotting:
+                    self.total_distance.append(rel_trans)
+                    self.total_stddev.append(std_dev)
+                    self.total_rot.append(rel_rot_rpy)
                 
-            return rel_trans, ref_rot_mat, std_dev
+                
+            return rel_trans, ref_rot_mat, std_dev, ref_tvec
+        
+        else: 
+            return None, None, None, None
+    
+    def plot(self, trueTrans=None, trueRot=None):
+        total_distance = np.array(self.total_distance)
+        total_rot = np.array(self.total_rot)
+        x = total_distance[:,1].flatten()
+        y = total_distance[:,0].flatten()
+        z = total_distance[:,2].flatten()
+        if trueTrans is not None: trueTrans = np.array(trueTrans)
+        if trueRot is not None: trueRot = np.array(trueRot)
+        
+        plt.tight_layout()
+        plt.subplot(2,1,1)
+        plt.plot(x,color='red',linestyle='--',label='ref x')
+        plt.plot(y,color='blue',linestyle='--',label='ref y')
+        plt.plot(z,color='green',linestyle='--',label='ref z')
+        plt.title('Marker Position in Reference Frame')
+        plt.ylabel('Position [mm]')
+        plt.xlabel('Frames')
+        plt.legend()
+        
+        if trueTrans is not None:
+            true_x = trueTrans[:,0]
+            true_y = trueTrans[:,1]
+            true_z = trueTrans[:,2]  # this had 0.025 subtracted before and I don't know why
+            plt.plot(true_x,color='red',linestyle='-',label='true x')
+            plt.plot(true_y,color='blue',linestyle='-',label='true y')
+            plt.plot(true_z,color='green',linestyle='-',label='true z')
+
+        plt.subplot(2,1,2)
+        plt.plot(total_rot[:,0],color='red',linestyle='--',label='roll')
+        
+        plt.plot(total_rot[:,1],color='blue',linestyle='--',label='pitch')
+        
+        plt.plot(total_rot[:,2],color='green',linestyle='--',label='yaw')
+        
+        plt.title('Marker Rotation in Reference Frame')
+        plt.ylabel('Angular Displacement [deg]')
+        plt.xlabel('Frames')
+        plt.tight_layout()
+        plt.legend()
+        
+        if trueRot is not None:
+            plt.plot(trueRot[:,0],color='red',linestyle='-')
+            plt.plot(trueRot[:,1],color='blue',linestyle='-')
+            plt.plot(trueRot[:,2],color='green',linestyle='-')
+        
+        plt.savefig(f'plots/marker_pos {time.strftime("%Y-%m-%d %H-%M-%S")}.pdf')
+        plt.show()
+        
+        if trueTrans is not None:
+            x_err = np.abs(x-true_x)
+            y_err = np.abs(y-true_y)
+            z_err = (z-true_z)
+            x_err_rel = x_err / np.abs(true_x)
+            y_err_rel = y_err / np.abs(true_y)
+            plt.subplot(2,1,1)
+            plt.tight_layout()
+            plt.plot(x_err,color='red',linestyle='-',label='x error')
+            plt.plot(y_err,color='blue',linestyle='-',label='y error')
+            plt.plot(z_err,color='green',linestyle='-',label='z error')
+            plt.title('Absolute Error')
+            plt.ylabel('[mm]')
+            plt.xlabel('Frames')
+            plt.legend(loc='upper right')
+
+        # plt.subplot(3,1,2)
+        # plt.plot(x_err_rel,color='red',linestyle='-',label='x error')
+        # plt.plot(y_err_rel,color='blue',linestyle='-',label='y error')
+        # plt.title("Relative Error")
+        # plt.ylabel('[%]')
+        # plt.xlabel('Frames')
+        # plt.legend(loc='upper right')
+        
+        std_dev = np.array(self.total_stddev)
+        plt.subplot(2,1,2)
+        plt.plot(std_dev[:,0],color='red',linestyle='-',label='x std dev')
+        plt.plot(std_dev[:,1],color='blue',linestyle='-',label='y std dev')
+        plt.plot(std_dev[:,2],color='green',linestyle='-',label='z std dev')
+        plt.title('Standard Deviation')
+        plt.ylabel('[pixels]')
+        plt.xlabel('Frames')
+        plt.legend(loc='upper right')
 
         
+        plt.savefig(f'plots/marker_error {time.strftime("%Y-%m-%d %H-%M-%S")}.pdf')
+        plt.show()
         
     def estimate_pose_marker(self,corners,ids, target_id: int):
         """

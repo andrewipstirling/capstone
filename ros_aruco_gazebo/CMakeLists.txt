@@ -12,12 +12,31 @@ add_definitions(-Wall -Werror)
 # Find OpenCV
 find_package(OpenCV)
 
+## GStreamer 1.0 package required
+find_package(PkgConfig)
+
+macro(find_gstreamer_component prefix pkg lib)
+  pkg_check_modules(PC_${prefix} REQUIRED ${pkg})
+  find_library(${prefix}_LIBRARIES NAMES ${lib} HINTS ${PC_${prefix}_LIBRARY_DIRS} ${PC_${prefix}_LIBDIR})
+  list(APPEND gstreamer_INCLUDE_DIRS ${PC_${prefix}_INCLUDE_DIRS})
+  list(APPEND gstreamer_LIBRARIES ${${prefix}_LIBRARIES})
+  mark_as_advanced(${prefix}_LIBRARIES gstreamer_LIBRARIES gstreamer_INCLUDE_DIRS)
+endmacro()
+
+find_gstreamer_component(gst      gstreamer-1.0       gstreamer-1.0)
+find_gstreamer_component(gstbase  gstreamer-base-1.0  gstbase-1.0)
+find_gstreamer_component(gstapp   gstreamer-app-1.0   gstapp-1.0)
+find_gstreamer_component(gstvideo gstreamer-video-1.0 gstvideo-1.0)
+
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED
   COMPONENTS
     roscpp
     rospy
     std_msgs
+    sensor_msgs
+    cv_bridge
+    message_generation
 )
 
 ###################################
@@ -36,6 +55,9 @@ catkin_package(
     roscpp
     rospy
     std_msgs
+    sensor_msgs
+    cv_bridge
+    message_runtime
   DEPENDS 
 )
 
@@ -49,5 +71,10 @@ include_directories(
 	include
 	${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
+)
+
+catkin_install_python(PROGRAMS 
+  src/real_camera.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

@@ -13,12 +13,13 @@ from cv_bridge import CvBridge, CvBridgeError
 from gazebo_msgs.msg import ModelStates
 import geometry_msgs
 
-PUBRATE = 10
+PUBRATE = 60
 PLOTTING = False
 
 class ImageSub:
     # Class initialize
     def __init__(self,sub_topic_name:str,pub_topic_name:str) -> None:
+        
         self.show_image = False
         self.img_msg = None
         self.bridge = CvBridge()
@@ -28,13 +29,13 @@ class ImageSub:
         self.camera_matrix = np.array([[2919.7999500495794, 0.0, 728.5], 
                                        [0.0, 2919.7999500495794, 544.5],
                                         [ 0.0, 0.0, 1.0]])
+        
+        
+        
         self.cv_cam_mat = cv2.Mat(self.camera_matrix)
         self.dist_coeffs = np.array([[0.0, 0.0, 0.0, 0.0, 0.0]
 ])
         self.cv_dist_coeffs = cv2.Mat(self.dist_coeffs)
-        self.rel_trans = 0
-        self.rel_rot = 0
-        self.std_dev = 0
 
         self.total_distance = []
         self.total_stddev = []
@@ -44,6 +45,7 @@ class ImageSub:
 
         #create image subscriber object
         self.sub_image_raw = rospy.Subscriber(sub_topic_name,Image,self.image_cb) 
+        self.sub_topic_name = sub_topic_name
         
 
         # self.pi_camera_info = rospy.Subscriber("/pi_camera/camera_info", CameraInfo, self.camera_info_cb)
@@ -56,11 +58,12 @@ class ImageSub:
         self.total_gazebo_ori = []
 
         self.sub = rospy.Subscriber('/gazebo/model_states',ModelStates,self.pose_cb)
-
+        
         # Board Information
         m = 0.04/2 # half of marker length
         c = 0.05/2 # half of cube length
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_100)
+        
         
         self.target_board_ids = np.array([0,1,2,3,4,5])
         self.ref_board_ids = np.array([6,7,8,9,10,11])
@@ -75,8 +78,11 @@ class ImageSub:
         
         # print(self.board_points,self.board_points.shape)
         # Create reference and target boards
+        
         self.ref_board = cv2.aruco.Board(self.board_points,self.aruco_dict,self.ref_board_ids)
         self.target_board = cv2.aruco.Board(self.board_points,self.aruco_dict,self.target_board_ids)
+
+        self.rel_trans, self.rel_rot_mat, self.std_dev = np.zeros((3,1)),np.zeros((3,3)),np.zeros((6,1))
         
         self.dt = 1 / PUBRATE
         self.prev_ref_rvec = None
@@ -121,7 +127,7 @@ class ImageSub:
         pos = self.rel_trans.ravel()
         quat = R.as_quat(R.from_matrix(self.rel_rot_mat)).ravel()
         
-        succ = np.concatenate((self.std_dev, np.ones(30)*self.estimated_pose_success))
+        succ = np.concatenate((self.std_dev.ravel(), np.ones(30)*self.estimated_pose_success))
         cov = list(succ.ravel())
 
         # print(cov)
@@ -159,10 +165,21 @@ class ImageSub:
             ref_obj_pts, ref_img_pts  = self.ref_board.matchImagePoints(corners,ids)
             target_obj_pts, target_img_pts = self.target_board.matchImagePoints(corners,ids)
             
+            if (target_img_pts is None or ref_img_pts is None):
+                rospy.logwarn_throttle(5, "%s: Couldn't match points", self.sub_topic_name)
+                self.estimated_pose_success = 0 # False
+                self.rel_trans, self.rel_rot_mat, self.std_dev = np.zeros((3,1)),np.zeros((3,3)),np.zeros((6,1))
+                return
+
+            if (len(target_img_pts) < 3 or len(ref_img_pts) < 3):
+                rospy.logwarn_throttle(5, "Not enough points for SolvePnp")
+                self.estimated_pose_success = 0 # False
+                self.rel_trans, self.rel_rot_mat, self.std_dev = np.zeros((3,1)),np.zeros((3,3)),np.zeros((6,1))
+                return
             # Deprecated 
             # ref_obj_pts, ref_img_pts = cv2.aruco.getBoardObjectAndImagePoints(self.ref_board,corners,ids)
             # target_obj_pts, target_img_pts = cv2.aruco.getBoardObjectAndImagePoints(self.target_board,corners,ids)
-
+            solve_flag = cv2.SOLVEPNP_ITERATIVE
             if self.prev_target_tvec is not None:
                 # ref_val, ref_rvec, ref_tvec = cv2.aruco.estimatePoseBoard(corners,ids,self.ref_board,self.cv_cam_mat,
                 #                                                           self.dist_coeffs,self.prev_ref_rvec, self.prev_ref_tvec,
@@ -175,12 +192,12 @@ class ImageSub:
                 # ref_tvec_predict = self.prev_ref_tvec + (self.ref_tvel * self.dt)
 
                 ref_val, ref_rvec, ref_tvec = cv2.solvePnP(ref_obj_pts,ref_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
-                                                           rvec=self.prev_ref_rvec,tvec=self.prev_ref_tvec,useExtrinsicGuess=True,flags=cv2.SOLVEPNP_ITERATIVE)
+                                                           rvec=self.prev_ref_rvec,tvec=self.prev_ref_tvec,useExtrinsicGuess=True,flags=solve_flag)
                 
                 # target_rvec_predict = self.prev_target_rvec + (self.target_rvel * self.dt)
                 # target_tvec_predict = self.prev_target_tvec + (self.target_tvel * self.dt)
                 target_val, target_rvec, target_tvec = cv2.solvePnP(target_obj_pts,target_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
-                                                                    rvec=self.prev_target_rvec,tvec=self.prev_target_tvec,useExtrinsicGuess=True,flags=cv2.SOLVEPNP_ITERATIVE)
+                                                                    rvec=self.prev_target_rvec,tvec=self.prev_target_tvec,useExtrinsicGuess=True,flags=solve_flag)
                 
                 
                 
@@ -191,16 +208,22 @@ class ImageSub:
                 #                                                                    self.cam_mat,self.dist_coeffs, rvec=None,tvec=None)
                 
                 ref_val, ref_rvec, ref_tvec = cv2.solvePnP(ref_obj_pts,ref_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
-                                                           rvec=None,tvec=None,useExtrinsicGuess=False,flags=cv2.SOLVEPNP_ITERATIVE)
+                                                           rvec=None,tvec=None,useExtrinsicGuess=False,flags=solve_flag)
                 
                 target_val, target_rvec, target_tvec = cv2.solvePnP(target_obj_pts,target_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
-                                                                    rvec=None,tvec=None,useExtrinsicGuess=False,flags=cv2.SOLVEPNP_ITERATIVE)
+                                                                    rvec=None,tvec=None,useExtrinsicGuess=False,flags=solve_flag)
                 self.prev_ref_rvec = ref_rvec
                 self.prev_ref_tvec = ref_tvec
                 self.prev_target_rvec = target_rvec
                 self.prev_target_tvec = target_tvec
                 
-
+            ref_rvec, ref_tvec = cv2.solvePnPRefineLM(ref_obj_pts,ref_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
+                                                      ref_rvec,ref_tvec,)
+            
+            target_rvec, target_tvec = cv2.solvePnPRefineLM(target_obj_pts,target_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
+                                                            target_rvec,target_tvec)
+            
+            
             self.ref_tvel = (ref_tvec - self.prev_ref_tvec) / self.dt 
             self.ref_rvel = (ref_rvec - self.prev_ref_rvec) / self.dt
 
@@ -214,23 +237,29 @@ class ImageSub:
 
             if target_val != 0 and ref_val != 0:
                 self.estimated_pose_success = 1
-                self.rel_trans = target_tvec - ref_tvec
+                
                 # Put into matrix form, return rotation matrix and jacobian of rotation matrix
                 target_rot_mat, _ = cv2.Rodrigues(target_rvec)
                 ref_rot_mat, _= cv2.Rodrigues(ref_rvec)
 
-                # Go from object coordinates to world coordinates
-                # T_{t//r} = T_{c//r} + (-T_{c//t})
-                self.rel_trans = ref_tvec - target_tvec
-
                 target_rot_mat = np.array(target_rot_mat)
                 ref_rot_mat = np.array(ref_rot_mat)
+
+                # Relative Translation Calculation
+                # Go from object coordinates to world coordinates
+                # T_{t//r} = T_{c//r} + (-T_{c//t})
+                rel_trans = ref_tvec - target_tvec  # Camera's reference frame
+                # Change into basis of reference frame
+                self.rel_trans = ref_rot_mat.T @ rel_trans  # Reference's reference frame
+                self.rel_trans[0] *= -1
+                self.rel_trans[1] *= -1
 
                 # solvePnp returns rotation of camera relative to marker !!
                 # R_{t//r} = R_{t//c} @ R_{c//r}
                 self.rel_rot_mat = target_rot_mat.T @ ref_rot_mat
 
-                self.rel_rot = R.from_matrix(self.rel_rot_mat).as_euler('xyz',degrees=True)
+                # Yaw, Pitch, Roll
+                self.rel_rot = R.from_matrix(self.rel_rot_mat).as_euler('ZYX',degrees=True)
 
                 _ , tar_jacobian = cv2.projectPoints(target_obj_pts,target_rvec,target_tvec,self.cv_cam_mat,self.cv_dist_coeffs)
 
@@ -239,8 +268,8 @@ class ImageSub:
                 self.std_dev = np.sqrt(np.diag(np.abs(sigma)))
 
                 
-                
-                rospy.loginfo_throttle(5,"Tool Pose: \n translation=%s \n rotation=%s", 
+                rospy.loginfo_throttle(5, "Information from: %s" ,self.sub_topic_name.split('/')[1])
+                rospy.loginfo_throttle(5,"Pose: \n translation=%s \n rotation [yaw, pitch, roll]=%s", 
                                     self.rel_trans, self.rel_rot)
                 rospy.loginfo_throttle(5,"Standard Deviation [x, y, z]: %s \n", self.std_dev[0:3])
                 if PLOTTING:
@@ -251,15 +280,16 @@ class ImageSub:
                 # self.total_gazebo_ori.append(self.gazebo_ori)
 
             else:
+                
                 rospy.logwarn_throttle(5, "Could not find any markers")
                 self.estimated_pose_success = 0 # False
-                self.rel_trans, self.rel_rot_mat, self.std_dev = np.zeros((3,1)),np.zeros((3,3)),np.zeros((3,1))
+                self.rel_trans, self.rel_rot_mat, self.std_dev = np.zeros((3,1)),np.zeros((3,3)),np.zeros((6,1))
 
         else:
             # rospy.loginfo("Rejected markers: %s",len(rejected))
             rospy.logwarn_throttle(5,"Length of IDs is 0")
             self.estimated_pose_success = 0 # False
-            self.rel_trans, self.rel_rot_mat, self.std_dev = np.zeros((3,1)),np.zeros((3,3)),np.zeros((3,1))
+            self.rel_trans, self.rel_rot_mat, self.std_dev = np.zeros((3,1)),np.zeros((3,3)),np.zeros((6,1))
 
 
 
@@ -282,6 +312,7 @@ def main():
     image_sub_2 = ImageSub(sub_topic_name='/pi_camera_2/image_raw',pub_topic_name='/pi_camera_2/pose_estimate')
     image_sub_3 = ImageSub(sub_topic_name='/pi_camera_3/image_raw',pub_topic_name='/pi_camera_3/pose_estimate')
     image_sub_4 = ImageSub(sub_topic_name='/pi_camera_4/image_raw',pub_topic_name='/pi_camera_4/pose_estimate')
+    image_sub_5 = ImageSub(sub_topic_name='/pi_camera_5/image_raw',pub_topic_name='/pi_camera_5/pose_estimate')
 
 
     rospy.init_node('image_fusion', anonymous=True)
@@ -293,6 +324,7 @@ def main():
         image_sub_2.update()
         image_sub_3.update()
         image_sub_4.update()
+        image_sub_5.update()
         
     cv2.destroyAllWindows()
     # Plotting 
