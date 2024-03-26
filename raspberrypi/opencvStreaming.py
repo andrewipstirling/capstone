@@ -7,7 +7,7 @@ import cv2
 # cap = cv2.VideoCapture("videotestsrc ! autovideoconvert ! appsink", cv2.CAP_GSTREAMER)
 
 # For ubuntu webcam
-# cap = cv2.VideoCapture("autovideosrc ! autovideoconvert ! appsink", cv2.CAP_GSTREAMER)
+# cap = cv2.VideoCapture("autovideosrc ! autovideoconvert ! appsink", cv2.CAP_GSTREAMER) 
 cap = cv2.VideoCapture("autovideosrc ! videoconvert ! video/x-raw, format=BGR ! appsink max-buffers=1 drop=true", cv2.CAP_GSTREAMER)
 
 
