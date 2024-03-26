@@ -4,6 +4,8 @@ import numpy as np
 import multiprocessing as mp
 import time
 
+### PRESS Q ON EACH WINDOW TO QUIT, DONT HIT CTRL+C ON MAIN PROCESS ###
+
 cams = [1, 2] # Camera IDs that correspond to label on pi and port number 500X
 
 # caps = []
@@ -61,15 +63,12 @@ def runCam(cam):
 
     cap.release()
 
-def main():
+if __name__ == "__main__":
     processes = []
     for cam in cams:
         process = mp.Process(target=runCam, args=(cam,))
         processes.append(process)
         process.start()
-
-if __name__ == "__main__":
-    main()
 
 # poseEstimator.plot(trueTrans=[-155.2, 0, 0], trueRot=[0, 0, 0])
 # poseEstimator.plot()
