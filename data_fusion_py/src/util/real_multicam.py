@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import multiprocessing as mp
 import time
+import dodecaBoard
 
 ### PRESS Q ON EACH WINDOW TO QUIT, DONT HIT CTRL+C ON MAIN PROCESS ###
 
@@ -31,10 +32,10 @@ ref_board = cv2.aruco.Board(board_points, aruco_dict, np.array([0]))
 target_board = cv2.aruco.Board(board_points, aruco_dict, np.array([1]))
 
 # Dodecahedron board
-# dodecaLength = 27.5  # dodecahedron edge length in mm
-# dodecaPoints = np.array([[[13.75, -8.575, 61.243], [-13.75, -8.575, 61.243], [-13.75, 18.925, 61.243], [13.75, 18.925, 61.243]],  # ID 0/11
-#                          [[13.75, 18.925, 61.243], [-13.75, 18.925, 61.243], [-13.75, 31.224, 36.647], [13.75, 31.224, 36.647]],  # ID 1/12
-#                          ],dtype=np.float32)
+dodecaLength = 27.5  # dodecahedron edge length in mm
+dodecaPoints = dodecaBoard.generate(dodecaLength)
+ref_board = cv2.aruco.Board(dodecaPoints, aruco_dict, np.arange(11))
+target_board = cv2.aruco.Board(dodecaPoints, aruco_dict, np.arange(11,22))
 
 def runCam(cam):
     cap = cv2.VideoCapture(f"udpsrc address=192.168.5.2 port=500{cam} ! application/x-rtp, clock-rate=90000, payload=96 ! rtph264depay ! h264parse ! avdec_h264 discard-corrupted-frames=true skip-frame=1 ! videoconvert ! video/x-raw, format=BGR ! appsink max-buffers=1 drop=true sync=false", cv2.CAP_GSTREAMER)
