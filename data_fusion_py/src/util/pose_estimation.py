@@ -115,7 +115,7 @@ class pose_estimation:
             # https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.html
             # Not sure if this helps
             ref_rvec, ref_tvec = cv2.solvePnPRefineLM(ref_obj_pts,ref_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
-                                                      ref_rvec,ref_tvec,)
+                                                      ref_rvec,ref_tvec)
             
             target_rvec, target_tvec = cv2.solvePnPRefineLM(target_obj_pts,target_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
                                                             target_rvec,target_tvec)
@@ -192,6 +192,7 @@ class pose_estimation:
             true_x = trueTrans[:,0]
             true_y = trueTrans[:,1]
             true_z = trueTrans[:,2]  # this had 0.025 subtracted before and I don't know why
+            # Need 0.025 in gazebo, as true state of block is relative to gazebo origin 
             plt.plot(true_x,color='red',linestyle='-',label='true x')
             plt.plot(true_y,color='blue',linestyle='-',label='true y')
             plt.plot(true_z,color='green',linestyle='-',label='true z')
