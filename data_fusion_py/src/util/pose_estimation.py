@@ -115,7 +115,7 @@ class pose_estimation:
             # https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.html
             # Not sure if this helps
             ref_rvec, ref_tvec = cv2.solvePnPRefineLM(ref_obj_pts,ref_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
-                                                      ref_rvec,ref_tvec,)
+                                                      ref_rvec,ref_tvec)
             
             target_rvec, target_tvec = cv2.solvePnPRefineLM(target_obj_pts,target_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
                                                             target_rvec,target_tvec)
