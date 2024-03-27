@@ -76,36 +76,49 @@ class pose_estimation:
         Relative orientation between target and reference marker in world frame stored
         as numpy matrix representing the rotation of target relative to reference.
         """
-        if ids is not None and len(ids) == 2:
+        if ids is not None and len(ids) > 0:
             ref_obj_pts, ref_img_pts = reference_board.matchImagePoints(corners,ids)
             target_obj_pts, target_img_pts = target_board.matchImagePoints(corners,ids)
 
-            # Deprecated
-            # ref_obj_pts, ref_img_pts = cv2.aruco.getBoardObjectAndImagePoints(reference_board,corners,ids)
-            # target_obj_pts, target_img_pts = cv2.aruco.getBoardObjectAndImagePoints(target_board,corners,ids)
-
+            if (target_img_pts is None or ref_img_pts is None):
+                print("Couldn't match object points...")
+                return None, None, None, None
+            
+            if (len(target_img_pts) < 3 or len(ref_img_pts) < 3):
+                print("Not enough object points for SolvePnP")
+                return None, None, None, None
+            
+            # Set Solving Method
+            solve_flag = cv2.SOLVEPNP_ITERATIVE #cv2.SOLVEPNP_EPNP
             if self.prev_target_tvec is not None:
                 # Estimate pose of Reference board
                 ref_val, ref_rvec, ref_tvec = cv2.solvePnP(ref_obj_pts,ref_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
-                                            rvec=self.prev_ref_rvec,tvec=self.prev_ref_tvec,useExtrinsicGuess=True,flags=cv2.SOLVEPNP_ITERATIVE)
+                                            rvec=self.prev_ref_rvec,tvec=self.prev_ref_tvec,useExtrinsicGuess=True,flags=solve_flag)
                 
                 # Estimate Pose of Target Board
                 target_val, target_rvec, target_tvec = cv2.solvePnP(target_obj_pts,target_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
-                                            rvec=self.prev_target_rvec,tvec=self.prev_target_tvec,useExtrinsicGuess=True,flags=cv2.SOLVEPNP_ITERATIVE)
+                                            rvec=self.prev_target_rvec,tvec=self.prev_target_tvec,useExtrinsicGuess=True,flags=solve_flag)
                    
             else:    
                 # Pose of Reference Board
                 ref_val, ref_rvec, ref_tvec = cv2.solvePnP(ref_obj_pts,ref_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
-                                                           rvec=None,tvec=None,useExtrinsicGuess=False,flags=cv2.SOLVEPNP_ITERATIVE)
+                                                           rvec=None,tvec=None,useExtrinsicGuess=False,flags=solve_flag)
                 # Pose of Target Board
                 target_val, target_rvec, target_tvec = cv2.solvePnP(target_obj_pts,target_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
-                                                                    rvec=None,tvec=None,useExtrinsicGuess=False,flags=cv2.SOLVEPNP_ITERATIVE)
+                                                                    rvec=None,tvec=None,useExtrinsicGuess=False,flags=solve_flag)
                 self.prev_ref_rvec = ref_rvec
                 self.prev_ref_tvec = ref_tvec
                 self.prev_target_rvec = target_rvec
                 self.prev_target_tvec = target_tvec
-                
 
+            # Pose Refinement added
+            # https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.html#:~:text=Pose%20refinement%20consists%20in%20estimating,solvePnPRefineVVS()%20for%20this%20problem.
+            ref_rvec, ref_tvec = cv2.solvePnPRefineLM(ref_obj_pts,ref_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
+                                                      ref_rvec,ref_tvec,)
+            
+            target_rvec, target_tvec = cv2.solvePnPRefineLM(target_obj_pts,target_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
+                                                            target_rvec,target_tvec)
+            
             self.ref_tvel = (ref_tvec - self.prev_ref_tvec) / self.dt 
             self.ref_rvel = (ref_rvec - self.prev_ref_rvec) / self.dt
 
