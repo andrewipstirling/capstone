@@ -271,7 +271,7 @@ class ImageSub:
                 rospy.loginfo_throttle(5, "Information from: %s" ,self.sub_topic_name.split('/')[1])
                 rospy.loginfo_throttle(5,"Pose: \n translation=%s \n rotation [yaw, pitch, roll]=%s", 
                                     self.rel_trans, self.rel_rot)
-                rospy.loginfo_throttle(5,"Standard Deviation [x, y, z]: %s \n", self.std_dev[0:3])
+                rospy.loginfo_throttle(5,"Standard Deviation [x, y, z]: %s \n", self.std_dev)
                 if PLOTTING:
                     self.total_distance.append(self.rel_trans)
                     self.total_stddev.append(self.std_dev)

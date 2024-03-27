@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from collections import deque
 import numpy as np
 import time
@@ -32,7 +31,7 @@ class FilterKalman:
     Kalman filter with constant Q and R
     '''
 
-    def __init__(self):
+    def __init__(self, freq = 65):
         self.prev_time = 0
         self.prev_point = np.array([0, 0, 0], dtype=float)
 
@@ -49,9 +48,11 @@ class FilterKalman:
         self.H = np.matrix([])  # Measurement. influences Kalman Gain K
         self.Q = np.matrix([])  # Action uncertainty (process variance)
         self.R = np.matrix([])  # Sensor noise
+        
+        self.dt = 1/freq
 
         self.init_matrix_except_depending_on_dt()
-        self.init_matrix_depending_on_dt(dt=0.2)
+        self.init_matrix_depending_on_dt(dt=self.dt)
 
     def filter(self, measured_point):
         current_time = time.time()  # TODO use time of img capture
@@ -111,7 +112,69 @@ class FilterKalman:
         dPoint = point - self.prev_point
         return point, np.matrix(np.concatenate([point, dPoint], axis=None)).T
 
+class KalmanFilterCV():
+    def __init__(self, freq=60):
+        # States = x, y, z, yaw, pitch, roll, dx, dy, dz, dyaw, dpitch, droll
+        # []
+        dt = 1 / freq
+        
+        process_noise = 0.0001
+        
 
+        self.A = np.array([[1, 0, 0, 0, 0, 0, dt, 0, 0, 0, 0, 0],
+                           [0, 1, 0, 0, 0, 0, 0, dt, 0, 0, 0, 0],
+                           [0, 0, 1, 0, 0, 0, 0, 0, dt, 0, 0, 0],
+                           [0, 0, 0, 1, 0, 0, 0, 0, 0, dt, 0, 0],
+                           [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, dt, 0],
+                           [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, dt],
+                           [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]])
+        
+        self.B = 0
+        # Measurement is only x, not dx
+        self.C = np.array([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                           [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                           [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                           [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+                           [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                           [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]])
+        # Process Noise
+        self.Q = np.eye(12,12) * process_noise
+        self.R = np.diag([0.008,0.008,0.01,0.0008,0.0008,0.0008])
+        self.P_k = np.zeros((12,12))
+        self.K_k = None
+        # State
+        self.x = None
+        # Measurements
+        self.u_acc = None
+        self.y_k = None
+
+    def initiate_state(self, x0):
+        # State
+        self.x = np.vstack((x0,np.zeros((6,1))))
+
+    def get_measurement(self, y_k):
+        self.u_acc = 0
+        self.y_k = y_k
+
+    def predict(self) -> np.ndarray:
+        # Prediction step
+        self.x = self.A @ self.x 
+        self.P_k = self.A @ self.P_k @ self.A.T + self.Q
+        return self.x
+    
+    def correct(self) -> None:
+        # Correction Step
+        tmp = (self.C @ self.P_k @ self.C.T) + self.R
+        self.K_k = self.P_k @ self.C.T @ np.linalg.solve(tmp,np.eye(tmp.shape[0],tmp.shape[1]))
+        self.x = self.x + self.K_k @ (self.y_k - (self.C @ self.x))
+        self.P_k = (np.eye(self.K_k.shape[0],self.C.shape[1]) - 
+                    (self.K_k @ self.C)) @ self.P_k
+        return
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
@@ -153,41 +216,3 @@ if __name__ == "__main__":
     plt.xlabel('Iteration')
     plt.ylabel('Voltage')
     plt.show()
-=======
-import numpy as np
-
-class KalmanFilter():
-    def __init__(self,A:np.ndarray,B:np.ndarray,C:np.ndarray,
-                 Q:np.ndarray,R:np.ndarray,x0:np.ndarray, P0:np.ndarray):
-        self.A = A
-        self.B = B
-        self.C = C
-        self.Q = Q
-        self.R = R
-        self.P_k = P0
-        self.K_k = None
-        # State
-        self.x = x0
-        # Measurements
-        self.u_acc = None
-        self.y_k = None
-
-    def get_measurement(self, u_acc, y_k):
-        self.u_acc = np.array([[u_acc]])
-        self.y_k = np.array([[y_k]])
-
-    def predict(self) -> np.ndarray:
-        # Insert Prediction step
-        self.x = self.A @ self.x + self.B @ self.u_acc
-        self.P_k = self.A @ self.P_k @ self.A.T + self.Q
-        return self.x
-    
-    def correct(self) -> None:
-        # Insert Correction Step
-        tmp = (self.C @ self.P_k @ self.C.T) + self.R
-        self.K_k = self.P_k @ self.C.T @ np.linalg.inv(tmp)
-        self.x = self.x + self.K_k @ (self.y_k - (self.C @ self.x))
-        self.P_k = (np.eye(self.K_k.shape[0],self.C.shape[1]) - 
-                    (self.K_k @ self.C)) @ self.P_k
-        return
->>>>>>> 7fa997b42258ef840731e67f97aeb19204d64353
