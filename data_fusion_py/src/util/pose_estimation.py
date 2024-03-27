@@ -112,7 +112,8 @@ class pose_estimation:
                 self.prev_target_tvec = target_tvec
 
             # Pose Refinement added
-            # https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.html#:~:text=Pose%20refinement%20consists%20in%20estimating,solvePnPRefineVVS()%20for%20this%20problem.
+            # https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.html
+            # Not sure if this helps
             ref_rvec, ref_tvec = cv2.solvePnPRefineLM(ref_obj_pts,ref_img_pts,self.cv_cam_mat,self.cv_dist_coeffs,
                                                       ref_rvec,ref_tvec,)
             
@@ -149,8 +150,8 @@ class pose_estimation:
                 # As Matrix
                 rel_rot_matrix = target_rot_mat.T @ ref_rot_mat
                 
-                # As roll-pitch-yaw (rpy) vector 
-                rel_rot_rpy = R.from_matrix(rel_rot_matrix).as_euler('xyz',degrees=True)
+                # As Yaw-Pitch-Roll Vector
+                rel_rot_ypr = R.from_matrix(rel_rot_matrix).as_euler('ZYX',degrees=True)
 
                 _ , tar_jacobian = cv2.projectPoints(target_obj_pts,target_rvec,target_tvec,self.camera_matrix,self.dist_coeffs)
 
@@ -160,7 +161,7 @@ class pose_estimation:
                 if self.plotting:
                     self.total_distance.append(rel_trans)
                     self.total_stddev.append(std_dev)
-                    self.total_rot.append(rel_rot_rpy)
+                    self.total_rot.append(rel_rot_ypr)
                 
                 
             return rel_trans, ref_rot_mat, std_dev, ref_tvec
@@ -196,11 +197,11 @@ class pose_estimation:
             plt.plot(true_z,color='green',linestyle='-',label='true z')
 
         plt.subplot(2,1,2)
-        plt.plot(total_rot[:,0],color='red',linestyle='--',label='roll')
+        plt.plot(total_rot[:,0],color='red',linestyle='--',label='yaw')
         
         plt.plot(total_rot[:,1],color='blue',linestyle='--',label='pitch')
         
-        plt.plot(total_rot[:,2],color='green',linestyle='--',label='yaw')
+        plt.plot(total_rot[:,2],color='green',linestyle='--',label='roll')
         
         plt.title('Marker Rotation in Reference Frame')
         plt.ylabel('Angular Displacement [deg]')
