@@ -34,10 +34,10 @@ while True:
         break
     
     corners, ids, rejected = detector.detectMarkers(frame)
-    rel_trans, rel_rot, std_dev, ref_tvec = poseEstimator.estimate_pose_board(ref_board, target_board, corners, ids)
-    # print(f'Translation: {rel_trans}, Rotation: {rel_rot}')
-    if rel_trans is not None:
-        print(f'X: {rel_trans[0]}, Y: {rel_trans[1]}, Z: {rel_trans[2]}', end='\r')
+    # rel_trans, rel_rot, std_dev, ref_tvec = poseEstimator.estimate_pose_board(ref_board, target_board, corners, ids)
+    # # print(f'Translation: {rel_trans}, Rotation: {rel_rot}')
+    # if rel_trans is not None:
+    #     print(f'X: {rel_trans[0]}, Y: {rel_trans[1]}, Z: {rel_trans[2]}', end='\r')
     
     overlayImg = cv2.aruco.drawDetectedMarkers(frame, corners, ids)
     cv2.imshow('frame', overlayImg)
