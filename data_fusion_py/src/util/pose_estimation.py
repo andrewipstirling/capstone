@@ -192,6 +192,7 @@ class pose_estimation:
             true_x = trueTrans[:,0]
             true_y = trueTrans[:,1]
             true_z = trueTrans[:,2]  # this had 0.025 subtracted before and I don't know why
+            # Need 0.025 in gazebo, as true state of block is relative to gazebo origin 
             plt.plot(true_x,color='red',linestyle='-',label='true x')
             plt.plot(true_y,color='blue',linestyle='-',label='true y')
             plt.plot(true_z,color='green',linestyle='-',label='true z')

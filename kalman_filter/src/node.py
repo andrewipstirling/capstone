@@ -189,8 +189,9 @@ class Fuse:
         # # Compute the weighted sum of arrays
         # self.weighted_pose = np.sum(poses_toavg * weights, axis=0).reshape((6,1))
 
+
         # Add to Kalman Filter
-        self.kalman.get_measurement(y_k=np.median(poses,axis=0))
+        self.kalman.set_measurement(y_k=np.median(poses,axis=0))
         self.final_pose = self.kalman.predict().reshape((12,1))[0:6]
         self.kalman.correct()
 
