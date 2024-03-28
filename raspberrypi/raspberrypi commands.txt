@@ -17,3 +17,22 @@ sudo nmcli c down 'Wired connection 1' && sudo nmcli c up 'Wired connection 1'
 
 # Install necessary packages
 sudo apt-get install gstreamer1.0-tools
+
+# Reset 
+sudo systemctl restart NetworkManager
+
+# Check ssh status
+sudo systemctl status ssh
+
+# Restart status
+sudo systemctl restart ssh
+
+# Wired IPv4 addresses
+Address: 192.168.5.2
+Netmask: 255.255.255.0
+
+# When was running slow, tried:
+# - Unplugging 1 minute, (ethernet then power)
+# - Connecting (ethernet after raspi has started up)
+# - Restarting ssh 
+# - Turning usb ethernet connection off, then on

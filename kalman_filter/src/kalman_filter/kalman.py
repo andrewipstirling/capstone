@@ -125,7 +125,7 @@ class KalmanFilterCV():
         # States = x, y, z, yaw, pitch, roll, dx, dy, dz, dyaw, dpitch, droll
         # []
         dt = 1 / freq
-
+        # x_k = A * x_k-1
         self.A = np.array([[1, 0, 0, 0, 0, 0, dt, 0, 0, 0, 0, 0],
                            [0, 1, 0, 0, 0, 0, 0, dt, 0, 0, 0, 0],
                            [0, 0, 1, 0, 0, 0, 0, 0, dt, 0, 0, 0],
@@ -141,6 +141,7 @@ class KalmanFilterCV():
         
         self.B = 0
         # Measurement is only x, not dx
+        # y = Cx
         self.C = np.array([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                            [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                            [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -149,7 +150,9 @@ class KalmanFilterCV():
                            [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]])
         # Process Noise
         self.Q = np.eye(12,12) * process_noise
+        
         self.R = np.diag([0.008,0.008,0.01,0.0008,0.0008,0.0008])
+        
         self.P_k = np.zeros((12,12))
         self.K_k = None
         # State
@@ -198,8 +201,10 @@ class KalmanFilterCV():
         tmp = (self.C @ self.P_k @ self.C.T) + self.R
         self.K_k = self.P_k @ self.C.T @ np.linalg.solve(tmp,np.eye(tmp.shape[0],tmp.shape[1]))
         self.x = self.x + self.K_k @ (self.y_k - (self.C @ self.x))
+        
         self.P_k = (np.eye(self.K_k.shape[0],self.C.shape[1]) - 
                     (self.K_k @ self.C)) @ self.P_k
+        
         return
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
