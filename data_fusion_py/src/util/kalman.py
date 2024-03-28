@@ -66,6 +66,26 @@ class KalmanFilterCV():
         self.u_acc = 0
         self.y_k = y_k
 
+    def set_dt(self,dt):
+        """
+        Sets the time interval between measurements.
+
+        Args:
+            dt (float): Time interval between measurements.
+        """
+        self.A = np.array([[1, 0, 0, 0, 0, 0, dt, 0, 0, 0, 0, 0],
+                           [0, 1, 0, 0, 0, 0, 0, dt, 0, 0, 0, 0],
+                           [0, 0, 1, 0, 0, 0, 0, 0, dt, 0, 0, 0],
+                           [0, 0, 0, 1, 0, 0, 0, 0, 0, dt, 0, 0],
+                           [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, dt, 0],
+                           [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, dt],
+                           [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]])
+        
     def predict(self) -> np.ndarray:
         """
         Prediction step of the Kalman filter.
