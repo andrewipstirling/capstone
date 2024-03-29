@@ -30,9 +30,9 @@ pose_5 = np.array([[0.12888246],
  [0.00075967],
  [0.00908928]])
 
-poses = np.array([pose_1,pose_2,pose_3,pose_4,pose_5])
-# print(np.mean(poses,axis=0,))
-# print(np.median(poses,axis=0))
+poses = [pose_1,pose_2,pose_3,pose_4,pose_5]
+# print(np.mean(poses,axis=1))
+print(np.median(poses,axis=0))
 # print(np.std(poses,axis=0))
 
 # def reject_outliers(data, m = 2.):
@@ -47,14 +47,22 @@ poses = np.array([pose_1,pose_2,pose_3,pose_4,pose_5])
 #     return data
 
 # print(reject_outliers(poses))
-poses_toavg = np.array(poses)
-weights = np.ones_like(poses_toavg)
-# Normalize weights to sum up to 1
-weights /= np.sum(weights, axis=0)
+# poses_toavg = np.array(poses)
+# weights = np.ones_like(poses_toavg)
+# # Normalize weights to sum up to 1
+# weights /= np.sum(weights, axis=0)
 
-# Compute the weighted sum of arrays
-weighted_pose = np.sum(poses_toavg * weights, axis=0)
-print(weighted_pose)
-print(np.mean(poses_toavg, axis=0))
+# # Compute the weighted sum of arrays
+# weighted_pose = np.sum(poses_toavg * weights, axis=0)
+# print(weighted_pose)
+# print(np.mean(poses_toavg, axis=0))
+def set_measurement_matrix(num_measurements = 5):
+    one_measurement = np.block([[np.eye(6),np.zeros((6,6))]])
+    C = np.block([[np.eye(6),np.zeros((6,6))]])
+    for _ in range(num_measurements-1):
+        C = np.vstack((C,one_measurement))
+    return C
+
+print(set_measurement_matrix(num_measurements=3))
 
 

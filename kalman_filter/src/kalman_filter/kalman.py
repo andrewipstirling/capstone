@@ -206,6 +206,43 @@ class KalmanFilterCV():
                     (self.K_k @ self.C)) @ self.P_k
         
         return
+    def set_dt(self,dt: float) -> None:
+        """
+        Sets the time interval between measurements.
+
+        Args:
+            dt (float): Time interval between measurements.
+        """
+        self.A = np.array([[1, 0, 0, 0, 0, 0, dt, 0, 0, 0, 0, 0],
+                           [0, 1, 0, 0, 0, 0, 0, dt, 0, 0, 0, 0],
+                           [0, 0, 1, 0, 0, 0, 0, 0, dt, 0, 0, 0],
+                           [0, 0, 0, 1, 0, 0, 0, 0, 0, dt, 0, 0],
+                           [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, dt, 0],
+                           [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, dt],
+                           [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]])
+        
+    def set_measurement_matrices(self, num_measurements: int, new_R: np.ndarray)-> None: 
+        """
+        Sets measurement matrix (C) and measurement covariance matrix (R) based upon number of cameras 
+        that have published data.
+        Args: 
+        num_measurements (int): Number of measurements/cameras that returned a pose estimate
+        new_R (np.ndarray): Associated covariance matrix. For each measurement, covariance should be a
+                            diagonal 6x6 matrix.  
+        """
+        one_measurement = np.block([[np.eye(6),np.zeros((6,6))]])
+        self.C = np.block([[np.eye(6),np.zeros((6,6))]])
+        for _ in range(num_measurements-1):
+            self.C = np.vstack((self.C,one_measurement))
+
+        self.R = new_R
+        return
+
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

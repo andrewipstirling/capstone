@@ -18,8 +18,8 @@ class RealCamera:
         return
     
 def main():
-    topic_name = '/real_cam_1/image_raw'
-    real_camera = RealCamera(topic_name)
+    topic_name = '/real_cam_4/image_raw'
+    real_camera_4 = RealCamera(topic_name)
     # Webcam
     # cap = cv2.VideoCapture("autovideosrc ! videoconvert ! video/x-raw, format=BGR ! appsink max-buffers=1 drop=true", cv2.CAP_GSTREAMER)
     # Raspi cam 4
@@ -43,7 +43,7 @@ def main():
                 
                 rospy.logdebug("Publishing to %s" , topic_name)
                 rospy.loginfo_throttle(10,"Publishing to %s" , topic_name)
-                real_camera.publish(frame)
+                real_camera_4.publish(frame)
 
         # cv2.imshow('frame', frame)
         # rospy.logdebug('Capture Opened: %s', cap.isOpened())

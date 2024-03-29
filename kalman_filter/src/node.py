@@ -163,37 +163,40 @@ class Fuse:
         return
     
     def update(self):
-        # self.final_pose = self.pose_1 + self.pose_2 + self.pose_3 + self.pose_4 + self.pose_5
-        # self.final_pose = self.final_pose / 5
-        # rospy.loginfo("Final Pose = %s",self.final_pose)
-        poses = np.array([self.pose_1,self.pose_2,self.pose_3,self.pose_4,self.pose_5])
-        covars = np.array([self.pose_1_variance,self.pose_2_variance,self.pose_3_variance,self.pose_4_variance,self.pose_5_variance])
-        # poses_toavg=[]
-        # weights = []
-        # median = np.median(poses,axis=0)
-        # std = np.std(poses,axis=0)
-        # for i in range(5):
-        #     pose_i = poses[:][:][i]
-        #     if self.pose_success[i]:
-        #         if np.mean(np.abs( pose_i - median)) > np.mean(3*std):
-        #             self.pose_success[i] = False
-        #         else:
-        #             print(np.diag(covars[:][:][i]))
-        #             poses_toavg.append(pose_i)
-        #             weights.append(1 / np.diag(covars[:][:][i]))
 
-        # poses_toavg = np.array(poses_toavg)
-        # weights = np.array(weights)
-        # # Normalize weights to sum up to 1
-        # weights /= np.sum(weights)
-        # # Compute the weighted sum of arrays
-        # self.weighted_pose = np.sum(poses_toavg * weights, axis=0).reshape((6,1))
+        # Predict using kalman filter
+        self.final_pose = self.kalman.predict().reshape((12,1))[0:6]
+
+        poses = [self.pose_1,self.pose_2,self.pose_3,self.pose_4,self.pose_5]
+        covars = [self.pose_1_variance,self.pose_2_variance,self.pose_3_variance,self.pose_4_variance,self.pose_5_variance]
+
+        kalman_measurement = np.array([])
+        covariance_matrix = np.array([])
+        num_cameras = 0
+        for i in range(5):
+            if self.pose_success[i]:
+                num_cameras += 1
+                if len(kalman_measurement) == 0:
+                    kalman_measurement = poses[i]
+                    covariance_matrix = covars[i]
+
+                else:
+                    kalman_measurement = np.vstack((kalman_measurement,poses[i]))
+                    # Set size properly
+                    # [[1, 0],    [[1, 0, 0],
+                    #  [0, 1]] ->  [0, 1, 0]
+                    #              [0, 0, 1]]
+                    zero_block = np.zeros((covariance_matrix.shape[1],covars[i].shape[0]))
+                    covariance_matrix = np.block([[covariance_matrix,zero_block],
+                                                  [zero_block.T, covars[i]]])
 
 
         # Add to Kalman Filter
-        self.kalman.set_measurement(y_k=np.median(poses,axis=0))
-        self.final_pose = self.kalman.predict().reshape((12,1))[0:6]
-        self.kalman.correct()
+        # self.kalman.set_measurement(y_k=np.median(poses,axis=0))
+        if num_cameras > 0:
+            self.kalman.set_measurement(y_k = kalman_measurement)
+            self.kalman.set_measurement_matrices(num_measurements=num_cameras,new_R=covariance_matrix)
+            self.kalman.correct()
 
     
         rospy.loginfo_throttle(2,"Final Pose %s", self.final_pose)
