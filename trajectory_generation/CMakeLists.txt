@@ -52,5 +52,6 @@ include_directories(
 
 catkin_install_python(PROGRAMS 
   src/follow_trajectory.py
+  src/control_pointer.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

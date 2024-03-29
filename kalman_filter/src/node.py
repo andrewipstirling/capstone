@@ -41,6 +41,7 @@ class Fuse:
         self.pose_5_success = False
 
         self.pose_success = [False,False,False,False,False]
+        self.new_update = [False,False,False,False,False]
 
 
         self.final_pose = np.zeros((6,1))
@@ -67,8 +68,10 @@ class Fuse:
         np.fill_diagonal(self.pose_1_variance,covar[0:7])
         if covar[7:].all() == 0:
             self.pose_success[0] = False
+            # self.new_update[0] = False
         else:
             self.pose_success[0] = True
+            # self.new_update[0] = True
         
         return
     
@@ -90,8 +93,10 @@ class Fuse:
 
         if covar[7:].all() == 0:
             self.pose_success[1] = False
+            # self.new_update[1] = False
         else:
             self.pose_success[1] = True
+            # self.new_update[1] = True
 
         return
     
@@ -113,8 +118,10 @@ class Fuse:
 
         if covar[7:].all() == 0:
             self.pose_success[2] = False
+            # self.new_update[2] = False
         else:
             self.pose_success[2] = True
+            # self.new_update[3] = True
 
         return
     def pose_cb_4(self, pose:PoseWithCovariance) -> None:
@@ -135,8 +142,10 @@ class Fuse:
 
         if covar[7:].all() == 0:
             self.pose_success[3] = False
+            # self.new_update[3] = False
         else:
             self.pose_success[3] = True
+            # self.new_update[3] = True
         
         return
     def pose_cb_5(self, pose:PoseWithCovariance) -> None:
@@ -157,9 +166,10 @@ class Fuse:
 
         if covar[7:].all() == 0:
             self.pose_success[4] = False
+            # self.new_update[4] = False
         else:
             self.pose_success[4] = True
-        
+            # self.new_update[4] = True
         return
     
     def update(self):
@@ -176,6 +186,7 @@ class Fuse:
         for i in range(5):
             if self.pose_success[i]:
                 num_cameras += 1
+
                 if len(kalman_measurement) == 0:
                     kalman_measurement = poses[i]
                     covariance_matrix = covars[i]
@@ -188,8 +199,8 @@ class Fuse:
                     #              [0, 0, 1]]
                     zero_block = np.zeros((covariance_matrix.shape[1],covars[i].shape[0]))
                     covariance_matrix = np.block([[covariance_matrix,zero_block],
-                                                  [zero_block.T, covars[i]]])
-
+                                                [zero_block.T, covars[i]]])
+                
 
         # Add to Kalman Filter
         # self.kalman.set_measurement(y_k=np.median(poses,axis=0))
@@ -197,6 +208,9 @@ class Fuse:
             self.kalman.set_measurement(y_k = kalman_measurement)
             self.kalman.set_measurement_matrices(num_measurements=num_cameras,new_R=covariance_matrix)
             self.kalman.correct()
+            rospy.loginfo_throttle(2, "Found %s new measurements", num_cameras)
+        else:
+            rospy.loginfo_throttle(2,"No new measurements available")
 
     
         rospy.loginfo_throttle(2,"Final Pose %s", self.final_pose)
@@ -231,6 +245,7 @@ def main():
     while not rospy.is_shutdown():
         fuser.update()
         fuser.publish()
+        rate.sleep()
     
     return
 

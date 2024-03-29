@@ -64,5 +64,7 @@ def set_measurement_matrix(num_measurements = 5):
     return C
 
 print(set_measurement_matrix(num_measurements=3))
+new = [False,False,False]
+print(new.count(True))
 
 
