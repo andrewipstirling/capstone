@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Site BuildName="(empty)"
+	BuildStamp="20240328-0221-Experimental"
+	Name="astirl-ThinkPad-X390"
+	Generator="ctest-3.16.3"
+	CompilerName="/usr/bin/c++"
+	CompilerVersion="9.4.0"
+	OSName="Linux"
+	Hostname="astirl-ThinkPad-X390"
+	OSRelease="5.15.0-101-generic"
+	OSVersion="#111~20.04.1-Ubuntu SMP Mon Mar 11 15:44:43 UTC 2024"
+	OSPlatform="x86_64"
+	Is64Bits="1"
+	VendorString="GenuineIntel"
+	VendorID="Intel Corporation"
+	FamilyID="6"
+	ModelID="142"
+	ProcessorCacheSize="6144"
+	NumberOfLogicalCPU="8"
+	NumberOfPhysicalCPU="4"
+	TotalVirtualMemory="2047"
+	TotalPhysicalMemory="7622"
+	LogicalProcessorsPerPhysical="2"
+	ProcessorClockFrequency="1800"
+	>
+	<Testing>
+		<StartDateTime>Mar 28 19:08 EDT</StartDateTime>
+		<StartTestTime>1711667313</StartTestTime>
+		<TestList/>
+		<EndDateTime>Mar 28 19:08 EDT</EndDateTime>
+		<EndTestTime>1711667313</EndTestTime>
+		<ElapsedMinutes>0</ElapsedMinutes>
+	</Testing>
+</Site>

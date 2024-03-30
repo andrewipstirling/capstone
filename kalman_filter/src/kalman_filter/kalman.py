@@ -125,7 +125,7 @@ class KalmanFilterCV():
         # States = x, y, z, yaw, pitch, roll, dx, dy, dz, dyaw, dpitch, droll
         # []
         dt = 1 / freq
-
+        # x_k = A * x_k-1
         self.A = np.array([[1, 0, 0, 0, 0, 0, dt, 0, 0, 0, 0, 0],
                            [0, 1, 0, 0, 0, 0, 0, dt, 0, 0, 0, 0],
                            [0, 0, 1, 0, 0, 0, 0, 0, dt, 0, 0, 0],
@@ -141,6 +141,7 @@ class KalmanFilterCV():
         
         self.B = 0
         # Measurement is only x, not dx
+        # y = Cx
         self.C = np.array([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                            [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                            [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -149,7 +150,9 @@ class KalmanFilterCV():
                            [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]])
         # Process Noise
         self.Q = np.eye(12,12) * process_noise
+        
         self.R = np.diag([0.008,0.008,0.01,0.0008,0.0008,0.0008])
+        
         self.P_k = np.zeros((12,12))
         self.K_k = None
         # State
@@ -198,9 +201,48 @@ class KalmanFilterCV():
         tmp = (self.C @ self.P_k @ self.C.T) + self.R
         self.K_k = self.P_k @ self.C.T @ np.linalg.solve(tmp,np.eye(tmp.shape[0],tmp.shape[1]))
         self.x = self.x + self.K_k @ (self.y_k - (self.C @ self.x))
+        
         self.P_k = (np.eye(self.K_k.shape[0],self.C.shape[1]) - 
                     (self.K_k @ self.C)) @ self.P_k
+        
         return
+    def set_dt(self,dt: float) -> None:
+        """
+        Sets the time interval between measurements.
+
+        Args:
+            dt (float): Time interval between measurements.
+        """
+        self.A = np.array([[1, 0, 0, 0, 0, 0, dt, 0, 0, 0, 0, 0],
+                           [0, 1, 0, 0, 0, 0, 0, dt, 0, 0, 0, 0],
+                           [0, 0, 1, 0, 0, 0, 0, 0, dt, 0, 0, 0],
+                           [0, 0, 0, 1, 0, 0, 0, 0, 0, dt, 0, 0],
+                           [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, dt, 0],
+                           [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, dt],
+                           [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]])
+        
+    def set_measurement_matrices(self, num_measurements: int, new_R: np.ndarray)-> None: 
+        """
+        Sets measurement matrix (C) and measurement covariance matrix (R) based upon number of cameras 
+        that have published data.
+        Args: 
+        num_measurements (int): Number of measurements/cameras that returned a pose estimate
+        new_R (np.ndarray): Associated covariance matrix. For each measurement, covariance should be a
+                            diagonal 6x6 matrix.  
+        """
+        one_measurement = np.block([[np.eye(6),np.zeros((6,6))]])
+        self.C = np.block([[np.eye(6),np.zeros((6,6))]])
+        for _ in range(num_measurements-1):
+            self.C = np.vstack((self.C,one_measurement))
+
+        self.R = new_R
+        return
+
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
