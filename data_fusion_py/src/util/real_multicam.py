@@ -70,6 +70,8 @@ if __name__ == "__main__":
         process = mp.Process(target=runCam, args=(cam,))
         processes.append(process)
         process.start()
+        
+    
 
 # poseEstimator.plot(trueTrans=[-155.2, 0, 0], trueRot=[0, 0, 0])
 # poseEstimator.plot()
