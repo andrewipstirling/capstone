@@ -1,4 +1,3 @@
-
 import kalman_filter.dodecaBoard as dodecaBoard
 from kalman_filter.pose_estimation import pose_estimation
 from kalman_filter.kalman import KalmanFilterCV
@@ -8,15 +7,14 @@ import numpy as np
 import multiprocessing as mp
 import time
 
+### PRESS Q ON EACH WINDOW TO QUIT, DONT HIT CTRL+C ON MAIN PROCESS ###
+
 ROS = False
+cams = [1, 2] # Camera IDs that correspond to label on pi and port number 500X
+
 if ROS:
     import rospy
     from geometry_msgs.msg import Pose
-
-
-### PRESS Q ON EACH WINDOW TO QUIT, DONT HIT CTRL+C ON MAIN PROCESS ###
-
-cams = [1, 2] # Camera IDs that correspond to label on pi and port number 500X
 
 # caps = []
 # for cam in cams[:]:
@@ -32,45 +30,46 @@ aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_100)
 arucoParams = cv2.aruco.DetectorParameters()
 detector = cv2.aruco.ArucoDetector(poseEstimator.aruco_dict, arucoParams)
 
-m = 33.2/2 # half of marker length (currently in mm)
+# m = 33.2/2 # half of marker length (currently in mm)
 
-# Single marker board
-board_points = np.array([[[-m, m, 0],[m, m, 0],[m, -m, 0],[-m, -m, 0]]],dtype=np.float32)
+# # Single marker board
+# board_points = np.array([[[-m, m, 0],[m, m, 0],[m, -m, 0],[-m, -m, 0]]],dtype=np.float32)
 
-ref_board = cv2.aruco.Board(board_points, aruco_dict, np.array([0]))
-target_board = cv2.aruco.Board(board_points, aruco_dict, np.array([1]))
+# ref_board = cv2.aruco.Board(board_points, aruco_dict, np.array([0]))
+# target_board = cv2.aruco.Board(board_points, aruco_dict, np.array([1]))
 
 # Dodecahedron board
-dodecaLength = 27.5  # dodecahedron edge length in mm
+dodecaLength = 40  # dodecahedron edge length in mm
 dodecaPoints = dodecaBoard.generate(dodecaLength)
 ref_board = cv2.aruco.Board(dodecaPoints, aruco_dict, np.arange(11))
 target_board = cv2.aruco.Board(dodecaPoints, aruco_dict, np.arange(11,22))
 
-def runCam(cam):
+def runCam(cam, childConn):
     cap = cv2.VideoCapture(f"udpsrc address=192.168.5.2 port=500{cam} ! application/x-rtp, clock-rate=90000, payload=96 ! rtph264depay ! h264parse ! avdec_h264 discard-corrupted-frames=true skip-frame=1 ! videoconvert ! video/x-raw, format=BGR ! appsink max-buffers=1 drop=true sync=false", cv2.CAP_GSTREAMER)
     if not cap.isOpened():
         print(f"Cannot open camera {cam}.")
         return
     
     while True:
+        if cv2.pollKey() == ord('q'):
+            cv2.destroyWindow(f'Camera {cam}')
+            break
+        
         ret, frame = cap.read()  # ret is True if frame is read correctly
         if not ret:
             print(f"Can't receive frame from camera {cam}.")
             break
         
         corners, ids, rejected = detector.detectMarkers(frame)
-        rel_trans, rel_rot, std_dev, ref_tvec = poseEstimator.estimate_pose_board(ref_board, target_board, corners, ids)
+        pose, covariance = poseEstimator.estimate_pose_board(ref_board, target_board, corners, ids)
         # print(f'Translation: {rel_trans}, Rotation: {rel_rot}')
-        if rel_trans is not None:
-            print(f'X: {rel_trans[0]}, Y: {rel_trans[1]}, Z: {rel_trans[2]}', end='\r')
-        
+        # if rel_trans is not None:
+        #     print(f'X: {rel_trans[0]}, Y: {rel_trans[1]}, Z: {rel_trans[2]}', end='\r')
 
         overlayImg = cv2.aruco.drawDetectedMarkers(frame, corners, ids)
         cv2.imshow(f'Camera {cam}', overlayImg)
         
-        if cv2.pollKey() == ord('q'):
-            cv2.destroyWindow(f'Camera {cam}')
-            break
+        childConn.send((pose, covariance))
 
     cap.release()
 
@@ -123,23 +122,42 @@ def ros_publish(final_pose:np.ndarray, pose_msg: Pose) -> Pose:
     return pose_msg
 
 if __name__ == "__main__":
-    processes = []
+    if ROS: 
+        rospy.init_node('pose_estimation', anonymous=True,log_level=rospy.INFO)
+        publisher = rospy.Publisher('kalman_filter/pose_estimate',Pose, queue_size=1)
+        pose_msg = Pose()
+        rate = rospy.Rate(60)
+    
     kalman_filter = KalmanFilterCV(60)
-    rospy.init_node('pose_estimation', anonymous=True,log_level=rospy.INFO)
-    publisher = rospy.Publisher('kalman_filter/pose_estimate',Pose, queue_size=1)
-    pose_msg = Pose()
-    rate = rospy.Rate(60)
-
-    while not rospy.is_shutdown():
-        for cam in cams:
-            queue = mp.Queue()
-            process = mp.Process(target=runCam, args=(cam))
-            processes.append(process)
-            process.start()
+    processes = []
+    parentConns = []
+    childConns = []
+    
+    for cam in cams:
+        parentConn, childConn = mp.Pipe(False)
+        process = mp.Process(target=runCam, args=(cam, childConn))
+        process.start()
         
-        kalman_filter, final_pose = update_kalman(kalman_filter, poses=[None], covars=[None])
-        pose_msg = ros_publish(final_pose, pose_msg)
-        publisher.publish(pose_msg)
+        processes.append(process)
+        parentConns.append(parentConn)
+        childConns.append(childConn)
+    
+    while True:
+        if rospy.is_shutdown(): break
+        
+        poses = []
+        covars = []
+        
+        for i, cam in enumerate(cams):
+            pose, covar = parentConns[i].recv()
+            poses.append(pose)
+            covars.append(covar)
+        
+        kalman_filter, final_pose = update_kalman(kalman_filter, poses=poses, covars=covars)
+        
+        if ROS:
+            pose_msg = ros_publish(final_pose, pose_msg)
+            publisher.publish(pose_msg)
 
     
 

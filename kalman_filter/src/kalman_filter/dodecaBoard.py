@@ -1,9 +1,11 @@
+# %%
 # Pentagon formulas: https://www.calctool.org/math-and-statistics/pentagon
 # Dodecahedron formulas: https://www.treenshop.com/Treenshop/ArticlesPages/FiguresOfInterest_Article/The%20Dodecahedron.htm#
 import numpy as np
 
 # l is marker length in mm, which is equal to edge length of the pentagonal faces
-def generate(l):
+# offset is x, y, z tuple defining distance to tool tip
+def generate(l, offset=(0,0,0)):
 
     pentaAngle = 3*np.pi/5  # Angle between each edge within a pentagonal face (rad), = 108 deg
     adjAngle = np.arccos(-np.sqrt(5)/5)  # Angle between adjacent faces across their connecting edge, AKA dihedral angle (rad), = ~116.565 deg
@@ -40,5 +42,9 @@ def generate(l):
             [l/2, -r, 0], [-l/2, -r, 0]]
 
     tags[7:11] = [(np.linalg.matrix_power(rotMat, i) @ tags[6].T).T for i in range(1,5)]
+    
+    tags += offset
 
     return tags
+
+# %%
