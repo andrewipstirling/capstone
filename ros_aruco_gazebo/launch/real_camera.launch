@@ -6,9 +6,29 @@
         <!-- For example: <param name="param_name" value="param_value"/> -->
     </node>
     <!-- Launch image_view node -->
-    <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
+    <node name="image_view_1" pkg="image_view" type="image_view" respawn="false" output="screen">
         <!-- Subscribe to the image topic published by your node -->
         <remap from="image" to="/real_cam_1/image_raw"/>
+        <param name="autosize" value="true" />
+    </node>
+    <node name="image_view_2" pkg="image_view" type="image_view" respawn="false" output="screen">
+        <!-- Subscribe to the image topic published by your node -->
+        <remap from="image" to="/real_cam_2/image_raw"/>
+        <param name="autosize" value="true" />
+    </node>
+    <node name="image_view_3" pkg="image_view" type="image_view" respawn="false" output="screen">
+        <!-- Subscribe to the image topic published by your node -->
+        <remap from="image" to="/real_cam_3/image_raw"/>
+        <param name="autosize" value="true" />
+    </node>
+    <node name="image_view_4" pkg="image_view" type="image_view" respawn="false" output="screen">
+        <!-- Subscribe to the image topic published by your node -->
+        <remap from="image" to="/real_cam_4/image_raw"/>
+        <param name="autosize" value="true" />
+    </node>
+    <node name="image_view_5" pkg="image_view" type="image_view" respawn="false" output="screen">
+        <!-- Subscribe to the image topic published by your node -->
+        <remap from="image" to="/real_cam_5/image_raw"/>
         <param name="autosize" value="true" />
     </node>
     <!-- Launch rviz node -->

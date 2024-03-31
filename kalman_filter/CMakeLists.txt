@@ -4,6 +4,8 @@ project(kalman_filter)
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 
+# Find OpenCV
+find_package(OpenCV)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -12,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   sensor_msgs
+  geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -166,6 +169,7 @@ include_directories(
 # in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   src/node.py
+  src/real_multicam.py
   src/kalman_filter/kalman.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

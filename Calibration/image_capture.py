@@ -17,7 +17,7 @@ while True:
         break
     
     if cv2.pollKey() == ord('c'):
-        cv2.imwrite(f'camera_images/{time.strftime("%Y-%m-%d %H-%M-%S")}.jpg', frame)
+        cv2.imwrite(f'camera_images/cam_5/{time.strftime("%Y-%m-%d %H-%M-%S")}.jpg', frame)
 
 cap.release()
 cv2.destroyAllWindows()
