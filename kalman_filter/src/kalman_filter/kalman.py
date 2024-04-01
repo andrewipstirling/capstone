@@ -160,6 +160,7 @@ class KalmanFilterCV():
         # Measurements
         self.u_acc = None
         self.y_k = None
+        self.iniated_flag = False
 
     def initiate_state(self, x0):
         """
@@ -170,6 +171,10 @@ class KalmanFilterCV():
         """
         # State
         self.x = np.vstack((x0,np.zeros((6,1))))
+        self.iniated_flag = True
+    
+    def has_been_initiated(self):
+        return self.iniated_flag
 
     def set_measurement(self, y_k):
         """

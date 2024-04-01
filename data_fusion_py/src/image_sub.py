@@ -12,13 +12,14 @@ from geometry_msgs.msg import PoseWithCovariance
 from cv_bridge import CvBridge, CvBridgeError
 from gazebo_msgs.msg import ModelStates
 import geometry_msgs
+from util import dodecaBoard
 
 PUBRATE = 60
 PLOTTING = False
 
 class ImageSub:
     # Class initialize
-    def __init__(self,sub_topic_name:str,pub_topic_name:str) -> None:
+    def __init__(self,sub_topic_name:str,pub_topic_name:str,real=False) -> None:
         
         self.show_image = False
         self.img_msg = None
@@ -33,9 +34,17 @@ class ImageSub:
         
         
         self.cv_cam_mat = cv2.Mat(self.camera_matrix)
-        self.dist_coeffs = np.array([[0.0, 0.0, 0.0, 0.0, 0.0]
-])
+        self.dist_coeffs = np.array([[0.0, 0.0, 0.0, 0.0, 0.0]])
         self.cv_dist_coeffs = cv2.Mat(self.dist_coeffs)
+        if real:
+            self.camera_matrix = np.array([[1.56842921e+03, 0, 2.89275503e+02], 
+                                       [0, 1.57214434e+03, 2.21092150e+02], 
+                                       [0, 0, 1]])
+            self.cv_cam_mat = cv2.Mat(self.camera_matrix)
+            self.dist_coeffs = np.array([[ 2.28769970e-02, -4.54632281e+00, -3.04424079e-03, -2.06207084e-03, 9.30400565e+01]])
+            self.cv_dist_coeffs = cv2.Mat(self.dist_coeffs)
+            dodecaBoard.generate(40)
+
 
         self.total_distance = []
         self.total_stddev = []
@@ -153,8 +162,13 @@ class ImageSub:
             rospy.logwarn(e)
 
         arucoParams = cv2.aruco.DetectorParameters()
+        arucoParams.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_SUBPIX
+        arucoParams.cornerRefinementMaxIterations = 100
+        arucoParams.cornerRefinementMinAccuracy = 0.01
+        # arucoParams.minMarkerDistanceRate = 0
+        # arucoParams.minGroupDistance = 0
         # arucoParams.polygonalApproxAccuracyRate = 0.01
-        # arucoParams.useAruco3Detection = True
+        arucoParams.useAruco3Detection = True
         detector = cv2.aruco.ArucoDetector(self.aruco_dict,arucoParams)
         
         corners, ids, rejected = detector.detectMarkers(cv_image)
@@ -268,10 +282,10 @@ class ImageSub:
                 self.std_dev = np.sqrt(np.diag(np.abs(sigma)))
 
                 
-                rospy.loginfo_throttle(5, "Information from: %s" ,self.sub_topic_name.split('/')[1])
-                rospy.loginfo_throttle(5,"Pose: \n translation=%s \n rotation [yaw, pitch, roll]=%s", 
+                rospy.loginfo_throttle(2, "Information from: %s" ,self.sub_topic_name.split('/')[1])
+                rospy.loginfo_throttle(2,"Pose: \n translation=%s \n rotation [yaw, pitch, roll]=%s", 
                                     self.rel_trans, self.rel_rot)
-                rospy.loginfo_throttle(5,"Standard Deviation [x, y, z]: %s \n", self.std_dev)
+                rospy.loginfo_throttle(2,"Standard Deviation [x, y, z]: %s \n", self.std_dev)
                 if PLOTTING:
                     self.total_distance.append(self.rel_trans)
                     self.total_stddev.append(self.std_dev)
@@ -308,11 +322,21 @@ class ImageSub:
     
 
 def main():
-    image_sub_1 = ImageSub(sub_topic_name='/pi_camera_1/image_raw',pub_topic_name='/pi_camera_1/pose_estimate')
-    image_sub_2 = ImageSub(sub_topic_name='/pi_camera_2/image_raw',pub_topic_name='/pi_camera_2/pose_estimate')
-    image_sub_3 = ImageSub(sub_topic_name='/pi_camera_3/image_raw',pub_topic_name='/pi_camera_3/pose_estimate')
-    image_sub_4 = ImageSub(sub_topic_name='/pi_camera_4/image_raw',pub_topic_name='/pi_camera_4/pose_estimate')
-    image_sub_5 = ImageSub(sub_topic_name='/pi_camera_5/image_raw',pub_topic_name='/pi_camera_5/pose_estimate')
+    real_camera = True
+    if real_camera:
+        # image_sub_1 = ImageSub(sub_topic_name='/real_cam_1/image_raw',pub_topic_name='/pi_camera_1/pose_estimate',real=True)
+        # image_sub_2 = ImageSub(sub_topic_name='/real_cam_2/image_raw',pub_topic_name='/pi_camera_2/pose_estimate',real=True)
+        # image_sub_3 = ImageSub(sub_topic_name='/real_cam_3/image_raw',pub_topic_name='/pi_camera_3/pose_estimate',real=True)
+        image_sub_4 = ImageSub(sub_topic_name='/real_cam_4/image_raw',pub_topic_name='/pi_camera_4/pose_estimate',real=True)
+        # image_sub_5 = ImageSub(sub_topic_name='/real_cam_5/image_raw',pub_topic_name='/pi_camera_5/pose_estimate',real=True)
+
+
+    else:
+        image_sub_1 = ImageSub(sub_topic_name='/pi_camera_1/image_raw',pub_topic_name='/pi_camera_1/pose_estimate')
+        image_sub_2 = ImageSub(sub_topic_name='/pi_camera_2/image_raw',pub_topic_name='/pi_camera_2/pose_estimate')
+        image_sub_3 = ImageSub(sub_topic_name='/pi_camera_3/image_raw',pub_topic_name='/pi_camera_3/pose_estimate')
+        image_sub_4 = ImageSub(sub_topic_name='/pi_camera_4/image_raw',pub_topic_name='/pi_camera_4/pose_estimate')
+        image_sub_5 = ImageSub(sub_topic_name='/pi_camera_5/image_raw',pub_topic_name='/pi_camera_5/pose_estimate')
 
 
     rospy.init_node('image_fusion', anonymous=True)
@@ -320,11 +344,11 @@ def main():
     rospy.Rate(PUBRATE)
 
     while not rospy.is_shutdown():
-        image_sub_1.update()
-        image_sub_2.update()
-        image_sub_3.update()
+        # image_sub_1.update()
+        # image_sub_2.update()
+        # image_sub_3.update()
         image_sub_4.update()
-        image_sub_5.update()
+        # image_sub_5.update()
         
     cv2.destroyAllWindows()
     # Plotting 

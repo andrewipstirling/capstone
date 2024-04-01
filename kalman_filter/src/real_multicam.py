@@ -9,9 +9,9 @@ import time
 
 ### PRESS Q ON EACH WINDOW TO QUIT ###
 
-ROS = False
-cams = [1, 2, 3, 4, 5] # Camera IDs that correspond to label on pi and port number 500X
-
+ROS = True
+# cams = [1, 2, 3, 4, 5] # Camera IDs that correspond to label on pi and port number 500X
+cams = [1]
 if ROS:
     import rospy
     from geometry_msgs.msg import Pose
@@ -77,7 +77,7 @@ def runCam(cam, childConn):
                                                                             rvec=None,tvec=None,useExtrinsicGuess=False,flags=cv2.SOLVEPNP_ITERATIVE)
             overlayImg = cv2.drawFrameAxes(overlayImg, poseEstimator.cv_cam_mat, poseEstimator.cv_dist_coeffs, target_rvec, target_tvec, 50)
         
-            rel_rot_matrix = cv2.Rodrigues(target_rvec)
+            rel_rot_matrix, _ = cv2.Rodrigues(target_rvec)
             rel_rot_ypr = R.from_matrix(rel_rot_matrix).as_euler('ZYX',degrees=True)
             rel_rot_ypr = rel_rot_ypr.reshape((3,1))
             
@@ -125,16 +125,17 @@ def update_kalman(kalman: KalmanFilterCV, poses: list, covars: list):
     
 
 def ros_publish(final_pose:np.ndarray, pose_msg):
-    pose_msg.position.x = final_pose[0]
-    pose_msg.position.y = final_pose[1]
-    pose_msg.position.z = final_pose[2]
-    
-    euler = final_pose[3:].ravel()
-    quat = R.from_euler(seq='ZYX',angles=euler,degrees=False).as_quat()
-    pose_msg.orientation.x = quat[0]
-    pose_msg.orientation.y = quat[1]
-    pose_msg.orientation.z = quat[2]
-    pose_msg.orientation.w = quat[3]
+    if final_pose is not None:
+        pose_msg.position.x = final_pose[0]
+        pose_msg.position.y = final_pose[1]
+        pose_msg.position.z = final_pose[2]
+        
+        euler = final_pose[3:].ravel()
+        quat = R.from_euler(seq='ZYX',angles=euler,degrees=True).as_quat()
+        pose_msg.orientation.x = quat[0]
+        pose_msg.orientation.y = quat[1]
+        pose_msg.orientation.z = quat[2]
+        pose_msg.orientation.w = quat[3]
 
     return pose_msg
 
@@ -172,11 +173,13 @@ if __name__ == "__main__":
             poses.append(pose)
             covars.append(covar)
         
-        kalman_filter, final_pose = update_kalman(kalman_filter, poses=poses, covars=covars)
+        # kalman_filter, final_pose = update_kalman(kalman_filter, poses=poses, covars=covars)
+        final_pose = poses[0]
         
         if ROS:
             pose_msg = ros_publish(final_pose, pose_msg)
             publisher.publish(pose_msg)
+            rate.sleep()
 
     
 
