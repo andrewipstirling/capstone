@@ -147,7 +147,7 @@ if __name__ == "__main__":
         rate = rospy.Rate(60)
     
     kalman_filter = KalmanFilterCV(60)
-    kalman_filter.initiate_state(x0=np.zeros((6,1)))
+    # kalman_filter.initiate_state(x0=np.zeros((6,1)))
     processes = []
     parentConns = []
     childConns = []
@@ -170,11 +170,18 @@ if __name__ == "__main__":
         
         for i, cam in enumerate(cams):
             pose, covar = parentConns[i].recv()
-            poses.append(pose)
-            covars.append(covar)
+            if pose is not None:
+                poses.append(pose)
+                covars.append(covar)
+
+        # final_pose = poses[0]
+
+        if kalman_filter.has_been_initiated():
+            kalman_filter, final_pose = update_kalman(kalman_filter, poses=poses, covars=covars)
+        else:
+            kalman_filter.initiate_state(x0=np.median(poses,axis=0))
+            final_pose = kalman_filter.predict()
         
-        # kalman_filter, final_pose = update_kalman(kalman_filter, poses=poses, covars=covars)
-        final_pose = poses[0]
         
         if ROS:
             pose_msg = ros_publish(final_pose, pose_msg)
