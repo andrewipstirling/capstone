@@ -9,7 +9,8 @@ from PIL import Image
 class MarkerFactory:
 
     @staticmethod
-    def create_marker(tile_size, marker_size, id, margin, diam_size, penta_rotation):
+    # alignment can be "centre" or "edge", where anything except "edge" defaults to "centre"
+    def create_marker(tile_size, marker_size, id, margin, diam_size, penta_rotation, alignment="centre"):
         # aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_100)
         aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_100)
 
@@ -18,16 +19,24 @@ class MarkerFactory:
         # img_marker = aruco.drawMarker(aruco_dict, id, tile_size - 2 * margin,borderBits=1)
         img_marker = aruco.generateImageMarker(aruco_dict, id, marker_size)
 
-        # Calculate border and vertical position based on ID
+        # Calculate marker border and vertical position based on ID
         #y_shift = 21 # For 40mm marker/pentagon
         y_shift = 15 # For 27.5mm marker/pentagon
         border = int(margin + ((diam_size - marker_size) / 2))
-        if id == 0 or (6 <= id <= 11):  # For markers with bottom alignment
-            # img[y_shift+border:y_shift-border, border:-border] = img_marker # For 40mm
-            img[y_shift+border:y_shift-border-1, border:-border-1] = img_marker # For 27.5mm add -1 to border to deal with even marker size (pixel)
-        else:  # For markers with top alignment
-            # img[border-y_shift:-border-y_shift, border:-border] # For 40mm
-            img[border-y_shift:-border-y_shift-1, border:-border-1] = img_marker # For 27.5mm add -1 to border to deal with even marker size (pixel)
+        
+        # Alignment
+        if alignment == 'edge':
+            if id == 0 or (6 <= id <= 11):  # For markers with bottom alignment
+                # img[y_shift+border:y_shift-border, border:-border] = img_marker # For 40mm
+                img[y_shift+border:y_shift-border-1, border:-border-1] = img_marker # For 27.5mm add -1 to border to deal with even marker size (pixel)
+                
+            else:  # For markers with top alignment
+                # img[border-y_shift:-border-y_shift, border:-border] # For 40mm
+                img[border-y_shift:-border-y_shift-1, border:-border-1] = img_marker # For 27.5mm add -1 to border to deal with even marker size (pixel)
+
+        else:
+            y = round((tile_size-marker_size)/2)
+            img[y:y+marker_size, border:border+marker_size] = img_marker
 
         # Calculate pentagon vertices
         # https://math.stackexchange.com/questions/1990504/how-to-find-the-coordinates-of-the-vertices-of-a-pentagon-centered-at-the-origin
@@ -71,9 +80,9 @@ class TileMap:
 
 
 def main():
-    marker_mm = 27.5  # Marker side length in mm
-    penta_mm = 27.5 # Pentagon side length in mm
-    filePath = f'../dodecahedron/{marker_mm}mm_marker_{penta_mm}mm_penta.png'
+    marker_mm = 35  # Marker side length in mm
+    penta_mm = 40 # Pentagon side length in mm
+    filePath = f'../dodecahedron/{marker_mm}mm_marker_{penta_mm}mm_penta_centred.png'
     marker_id = 0  # id of first tag (0 for reference, 11 for target)
     marker_in = marker_mm/25.4  # Marker side length in inches
     penta_in = penta_mm/25.4  # Pentagon side length in inches
@@ -109,7 +118,7 @@ def main():
                 break
             
             angle = rotation_matrix[i][j]
-            marker_img = marker_factory.create_marker(tile_size, marker_size, marker_id, margin, diam_size, penta_rotation=angle)
+            marker_img = marker_factory.create_marker(tile_size, marker_size, marker_id, margin, diam_size, penta_rotation=angle, alignment="centre")
             tile_map.set_tile((i, j), marker_img)
             ids.append(marker_id)
 
