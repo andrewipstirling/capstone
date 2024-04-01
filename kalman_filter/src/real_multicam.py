@@ -125,16 +125,17 @@ def update_kalman(kalman: KalmanFilterCV, poses: list, covars: list):
     
 
 def ros_publish(final_pose:np.ndarray, pose_msg):
-    pose_msg.position.x = final_pose[0]
-    pose_msg.position.y = final_pose[1]
-    pose_msg.position.z = final_pose[2]
-    
-    euler = final_pose[3:].ravel()
-    quat = R.from_euler(seq='ZYX',angles=euler,degrees=False).as_quat()
-    pose_msg.orientation.x = quat[0]
-    pose_msg.orientation.y = quat[1]
-    pose_msg.orientation.z = quat[2]
-    pose_msg.orientation.w = quat[3]
+    if final_pose is not None:
+        pose_msg.position.x = final_pose[0]
+        pose_msg.position.y = final_pose[1]
+        pose_msg.position.z = final_pose[2]
+        
+        euler = final_pose[3:].ravel()
+        quat = R.from_euler(seq='ZYX',angles=euler,degrees=True).as_quat()
+        pose_msg.orientation.x = quat[0]
+        pose_msg.orientation.y = quat[1]
+        pose_msg.orientation.z = quat[2]
+        pose_msg.orientation.w = quat[3]
 
     return pose_msg
 

@@ -44,7 +44,7 @@ class ControlPointer:
         # rospy.loginfo_throttle(2,"Read Pose Succesfully as: %s", self.model_msg)
         
         # Publish
-        rospy.loginfo_throttle(10, "Succesfully published %s", self.model_msg)
+        rospy.loginfo_throttle(1, "Succesfully published %s", self.model_msg)
         self.pub.publish(self.model_msg)
 
     
