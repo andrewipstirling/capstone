@@ -7,7 +7,7 @@ import numpy as np
 import multiprocessing as mp
 import time
 
-### PRESS Q ON EACH WINDOW TO QUIT, DONT HIT CTRL+C ON MAIN PROCESS ###
+### PRESS Q ON EACH WINDOW TO QUIT ###
 
 ROS = False
 cams = [1, 2, 3, 4, 5] # Camera IDs that correspond to label on pi and port number 500X
