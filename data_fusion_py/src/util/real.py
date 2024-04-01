@@ -54,23 +54,11 @@ while True:
     overlayImg = cv2.aruco.drawDetectedMarkers(frame, corners, ids)
     
     if ids is not None:
-        count += 1
         target_obj_pts, target_img_pts = target_board.matchImagePoints(corners,ids)
         target_val, target_rvec, target_tvec = cv2.solvePnP(target_obj_pts,target_img_pts,poseEstimator.cv_cam_mat,poseEstimator.cv_dist_coeffs,
                                                                         rvec=None,tvec=None,useExtrinsicGuess=False,flags=cv2.SOLVEPNP_ITERATIVE)
-        target_rvec = R.from_rotvec(target_rvec).as_euler('ZYX',degrees=True)
-        total_tvecs.append(target_tvec)
-        total_rvecs.append(target_rvec)
-
-        # OX is drawn in red, OY in green and OZ in blue.
         overlayImg = cv2.drawFrameAxes(overlayImg, poseEstimator.cv_cam_mat, poseEstimator.cv_dist_coeffs, target_rvec, target_tvec, 50)
-        if count == 100:
-            print(f'Tvecs: {target_tvec}')
-            print(f'Rvecs [yaw, pitch, roll]: {target_rvec.T}')
-            count = 0
-        
-        
-
+    
     cv2.imshow('frame', overlayImg)
     if cv2.pollKey() == ord('q'):
         break
