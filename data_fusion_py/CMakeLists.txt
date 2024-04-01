@@ -57,6 +57,7 @@ include_directories(
 	${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
+catkin_python_setup()
 
 catkin_install_python(PROGRAMS 
   src/image_sub.py
@@ -69,4 +70,3 @@ add_message_files(
   PoseEstimate.msg
 )
 
-catkin_python_setup()

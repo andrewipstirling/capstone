@@ -75,6 +75,7 @@ def runCam(cam):
     cap.release()
 
 def update_kalman(kalman: KalmanFilterCV, poses: list, covars: list):
+    
     final_pose = kalman.predict().reshape((12,1))[0:6]
     # poses = [pose_1,pose_2,pose_3,pose_4,pose_5]
     poses = []
@@ -105,6 +106,7 @@ def update_kalman(kalman: KalmanFilterCV, poses: list, covars: list):
         kalman_filter.set_measurement_matrices(num_measurements=num_cameras, new_R=covariance_matrix)
         kalman.correct()
 
+
     return kalman, final_pose
     
 
@@ -125,6 +127,8 @@ def ros_publish(final_pose:np.ndarray, pose_msg: Pose) -> Pose:
 if __name__ == "__main__":
     processes = []
     kalman_filter = KalmanFilterCV(60)
+    ## Possibly will have to fix this
+    kalman_filter.initiate_state(np.zeros((6,1)))
     rospy.init_node('pose_estimation', anonymous=True,log_level=rospy.INFO)
     publisher = rospy.Publisher('kalman_filter/pose_estimate',Pose, queue_size=1)
     pose_msg = Pose()
@@ -136,10 +140,17 @@ if __name__ == "__main__":
             process = mp.Process(target=runCam, args=(cam))
             processes.append(process)
             process.start()
-        
+        # get poses from each process, add them to list i.e
+        # poses = [pose_1,pose_2,pose_3,pose_4,pose_5]
+        # Maybe fix this too
+        # median = np.median(poses, axis = 0)
+        # if not kalman_filter.has_been_initiated():
+        #     kalman_filter.initiate_state(x0=median)
         kalman_filter, final_pose = update_kalman(kalman_filter, poses=[None], covars=[None])
         pose_msg = ros_publish(final_pose, pose_msg)
         publisher.publish(pose_msg)
+
+        rate.sleep()
 
     
 
