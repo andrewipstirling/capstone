@@ -82,8 +82,8 @@ class TileMap:
 def main():
     marker_mm = 35  # Marker side length in mm
     penta_mm = 40 # Pentagon side length in mm
-    filePath = f'../dodecahedron/{marker_mm}mm_marker_{penta_mm}mm_penta_centred.png'
-    marker_id = 0  # id of first tag (0 for reference, 11 for target)
+    filePath = f'../dodecahedron/reference_{marker_mm}mm_marker_{penta_mm}mm_penta_centred.png'
+    marker_id = 11  # id of first tag (0 for reference, 11 for target)
     marker_in = marker_mm/25.4  # Marker side length in inches
     penta_in = penta_mm/25.4  # Pentagon side length in inches
     dpi = 72  # Page resolution in pixels per inch

@@ -9,9 +9,9 @@ import time
 
 ### PRESS Q ON EACH WINDOW TO QUIT ###
 
-ROS = True
-# cams = [1, 2, 3, 4, 5] # Camera IDs that correspond to label on pi and port number 500X
-cams = [1]
+ROS = False
+cams = [1, 2, 3, 4, 5] # Camera IDs that correspond to label on pi and port number 500X
+# cams = [1, 2]
 if ROS:
     import rospy
     from geometry_msgs.msg import Pose
@@ -39,12 +39,14 @@ detector = cv2.aruco.ArucoDetector(poseEstimator.aruco_dict, arucoParams)
 # target_board = cv2.aruco.Board(board_points, aruco_dict, np.array([1]))
 
 # Dodecahedron board
-dodecaLength = 40  # dodecahedron edge length in mm
-dodecaPoints = dodecaBoard.generate(dodecaLength, (0, 0, 135))
+marker_size = 24  # dodecahedron edge length in mm
+pentagon_size = 27.5
+dodecaPoints = dodecaBoard.generate(marker_size, pentagon_size, (0, 0, 135), 'centre')
 ref_board = cv2.aruco.Board(dodecaPoints, aruco_dict, np.arange(11))
 target_board = cv2.aruco.Board(dodecaPoints, aruco_dict, np.arange(11,22))
 
 def runCam(cam, childConn):
+    frameTime = 1/60
     cap = cv2.VideoCapture(f"udpsrc address=192.168.5.2 port=500{cam} ! application/x-rtp, clock-rate=90000, payload=96 ! rtph264depay ! h264parse ! avdec_h264 discard-corrupted-frames=true skip-frame=1 ! videoconvert ! video/x-raw, format=BGR ! appsink max-buffers=1 drop=true sync=false", cv2.CAP_GSTREAMER)
     if not cap.isOpened():
         print(f"Cannot open camera {cam}.")
@@ -55,6 +57,7 @@ def runCam(cam, childConn):
             cv2.destroyWindow(f'Camera {cam}')
             break
         
+        capTime = time.time()
         ret, frame = cap.read()  # ret is True if frame is read correctly
         if not ret:
             print(f"Can't receive frame from camera {cam}.")
@@ -87,8 +90,13 @@ def runCam(cam, childConn):
         cv2.imshow(f'Camera {cam}', overlayImg)
         
         childConn.send((pose, covariance))
+        
+        # print(time.time()-capTime)
+        deltaTime = time.time() - capTime
+        if deltaTime < frameTime: time.sleep(frameTime-deltaTime)
 
     cap.release()
+    childConn.close()
 
 def update_kalman(kalman: KalmanFilterCV, poses: list, covars: list):
     final_pose = kalman.predict().reshape((12,1))[0:6]
@@ -153,7 +161,7 @@ if __name__ == "__main__":
     childConns = []
     
     for cam in cams:
-        parentConn, childConn = mp.Pipe(False)
+        parentConn, childConn = mp.Pipe(False)  # True for two-way communication, False for one-way
         process = mp.Process(target=runCam, args=(cam, childConn))
         process.start()
         
@@ -176,11 +184,11 @@ if __name__ == "__main__":
 
         # final_pose = poses[0]
 
-        if kalman_filter.has_been_initiated():
-            kalman_filter, final_pose = update_kalman(kalman_filter, poses=poses, covars=covars)
-        else:
-            kalman_filter.initiate_state(x0=np.median(poses,axis=0))
-            final_pose = kalman_filter.predict()
+        # if kalman_filter.has_been_initiated():
+        #     kalman_filter, final_pose = update_kalman(kalman_filter, poses=poses, covars=covars)
+        # else:
+        #     kalman_filter.initiate_state(x0=np.median(poses,axis=0))
+        #     final_pose = kalman_filter.predict()
         
         
         if ROS:
@@ -188,17 +196,6 @@ if __name__ == "__main__":
             publisher.publish(pose_msg)
             rate.sleep()
 
-    
-
-
-
-
-    
-
-    
-
-    
-        
 
 # poseEstimator.plot(trueTrans=[-155.2, 0, 0], trueRot=[0, 0, 0])
 # poseEstimator.plot()
