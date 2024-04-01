@@ -47,11 +47,11 @@ while True:
     
     overlayImg = cv2.aruco.drawDetectedMarkers(frame, corners, ids)
     
-    # if ids is not None:
-    #     target_obj_pts, target_img_pts = target_board.matchImagePoints(corners,ids)
-    #     target_val, target_rvec, target_tvec = cv2.solvePnP(target_obj_pts,target_img_pts,poseEstimator.cv_cam_mat,poseEstimator.cv_dist_coeffs,
-    #                                                                     rvec=None,tvec=None,useExtrinsicGuess=False,flags=cv2.SOLVEPNP_ITERATIVE)
-    #     overlayImg = cv2.drawFrameAxes(overlayImg, poseEstimator.cv_cam_mat, poseEstimator.cv_dist_coeffs, target_rvec, target_tvec, 50)
+    if ids is not None:
+        target_obj_pts, target_img_pts = target_board.matchImagePoints(corners,ids)
+        target_val, target_rvec, target_tvec = cv2.solvePnP(target_obj_pts,target_img_pts,poseEstimator.cv_cam_mat,poseEstimator.cv_dist_coeffs,
+                                                                        rvec=None,tvec=None,useExtrinsicGuess=False,flags=cv2.SOLVEPNP_ITERATIVE)
+        overlayImg = cv2.drawFrameAxes(overlayImg, poseEstimator.cv_cam_mat, poseEstimator.cv_dist_coeffs, target_rvec, target_tvec, 50)
     
     cv2.imshow('frame', overlayImg)
     if cv2.pollKey() == ord('q'):

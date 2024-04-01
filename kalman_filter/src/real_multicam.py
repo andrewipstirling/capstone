@@ -10,7 +10,7 @@ import time
 ### PRESS Q ON EACH WINDOW TO QUIT, DONT HIT CTRL+C ON MAIN PROCESS ###
 
 ROS = False
-cams = [1, 2] # Camera IDs that correspond to label on pi and port number 500X
+cams = [1, 2, 3, 4, 5] # Camera IDs that correspond to label on pi and port number 500X
 
 if ROS:
     import rospy
@@ -40,7 +40,7 @@ detector = cv2.aruco.ArucoDetector(poseEstimator.aruco_dict, arucoParams)
 
 # Dodecahedron board
 dodecaLength = 40  # dodecahedron edge length in mm
-dodecaPoints = dodecaBoard.generate(dodecaLength)
+dodecaPoints = dodecaBoard.generate(dodecaLength, (0, 0, 135))
 ref_board = cv2.aruco.Board(dodecaPoints, aruco_dict, np.arange(11))
 target_board = cv2.aruco.Board(dodecaPoints, aruco_dict, np.arange(11,22))
 
@@ -60,13 +60,30 @@ def runCam(cam, childConn):
             print(f"Can't receive frame from camera {cam}.")
             break
         
+        pose = None
+        covariance = None
+        
         corners, ids, rejected = detector.detectMarkers(frame)
-        pose, covariance = poseEstimator.estimate_pose_board(ref_board, target_board, corners, ids)
+        # pose, covariance = poseEstimator.estimate_pose_board(ref_board, target_board, corners, ids)
         # print(f'Translation: {rel_trans}, Rotation: {rel_rot}')
         # if rel_trans is not None:
         #     print(f'X: {rel_trans[0]}, Y: {rel_trans[1]}, Z: {rel_trans[2]}', end='\r')
 
         overlayImg = cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+        
+        if ids is not None:
+            target_obj_pts, target_img_pts = target_board.matchImagePoints(corners,ids)
+            target_val, target_rvec, target_tvec = cv2.solvePnP(target_obj_pts,target_img_pts,poseEstimator.cv_cam_mat,poseEstimator.cv_dist_coeffs,
+                                                                            rvec=None,tvec=None,useExtrinsicGuess=False,flags=cv2.SOLVEPNP_ITERATIVE)
+            overlayImg = cv2.drawFrameAxes(overlayImg, poseEstimator.cv_cam_mat, poseEstimator.cv_dist_coeffs, target_rvec, target_tvec, 50)
+        
+            rel_rot_matrix = cv2.Rodrigues(target_rvec)
+            rel_rot_ypr = R.from_matrix(rel_rot_matrix).as_euler('ZYX',degrees=True)
+            rel_rot_ypr = rel_rot_ypr.reshape((3,1))
+            
+            pose = np.vstack((target_tvec, rel_rot_ypr))
+            covariance = np.zeros((6,6))
+            
         cv2.imshow(f'Camera {cam}', overlayImg)
         
         childConn.send((pose, covariance))
@@ -76,13 +93,13 @@ def runCam(cam, childConn):
 def update_kalman(kalman: KalmanFilterCV, poses: list, covars: list):
     final_pose = kalman.predict().reshape((12,1))[0:6]
     # poses = [pose_1,pose_2,pose_3,pose_4,pose_5]
-    poses = []
+    # poses = []
     # covars = [covar_1,covar_2,covar_3,covar_4,covar_5]
-    covars = []
+    # covars = []
     kalman_measurement = np.array([])
     covariance_matrix = np.array([])
     num_cameras = 0
-    for i in range(len(5)):
+    for i in range(len(poses)):
         if poses[i] is not None:
             num_cameras += 1
             if len(kalman_measurement) == 0:
@@ -107,7 +124,7 @@ def update_kalman(kalman: KalmanFilterCV, poses: list, covars: list):
     return kalman, final_pose
     
 
-def ros_publish(final_pose:np.ndarray, pose_msg: Pose) -> Pose:
+def ros_publish(final_pose:np.ndarray, pose_msg):
     pose_msg.position.x = final_pose[0]
     pose_msg.position.y = final_pose[1]
     pose_msg.position.z = final_pose[2]
@@ -129,6 +146,7 @@ if __name__ == "__main__":
         rate = rospy.Rate(60)
     
     kalman_filter = KalmanFilterCV(60)
+    kalman_filter.initiate_state(x0=np.zeros((6,1)))
     processes = []
     parentConns = []
     childConns = []
@@ -143,7 +161,8 @@ if __name__ == "__main__":
         childConns.append(childConn)
     
     while True:
-        if rospy.is_shutdown(): break
+        if True not in (process.is_alive() for process in processes): break
+        if ROS and rospy.is_shutdown(): break
         
         poses = []
         covars = []
