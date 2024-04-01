@@ -20,9 +20,9 @@ class ControlPointer:
     def pose_cb(self, pose_msg:Pose) -> None:
         if pose_msg is not None:
             # Translate for origin of marker object in gazebo
-            self.model_msg.pose.position.x = pose_msg.position.x + -0.023
-            self.model_msg.pose.position.y = pose_msg.position.y + -0.051
-            self.model_msg.pose.position.z = pose_msg.position.z + 0.032
+            self.model_msg.pose.position.x = (pose_msg.position.x/1000) + -0.023
+            self.model_msg.pose.position.y = (pose_msg.position.y/1000) + -0.051
+            self.model_msg.pose.position.z = (pose_msg.position.z/1000) + 0.032
 
             self.model_msg.pose.orientation.x = pose_msg.orientation.x
             self.model_msg.pose.orientation.y = pose_msg.orientation.y
