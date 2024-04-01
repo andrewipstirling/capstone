@@ -10,7 +10,7 @@ import time
 ### PRESS Q ON EACH WINDOW TO QUIT ###
 
 ROS = False
-cams = [1, 2, 3, 4, 5] # Camera IDs that correspond to label on pi and port number 500X
+cams = [1,2,3,4,5] # Camera IDs that correspond to label on pi and port number 500X
 # cams = [1, 2]
 if ROS:
     import rospy
@@ -28,6 +28,9 @@ if ROS:
 poseEstimator = pose_estimation(framerate=60, plotting=True)
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_100)
 arucoParams = cv2.aruco.DetectorParameters()
+arucoParams.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_SUBPIX
+arucoParams.cornerRefinementMaxIterations = 100
+arucoParams.cornerRefinementMinAccuracy = 0.01
 detector = cv2.aruco.ArucoDetector(poseEstimator.aruco_dict, arucoParams)
 
 # m = 33.2/2 # half of marker length (currently in mm)
@@ -39,11 +42,14 @@ detector = cv2.aruco.ArucoDetector(poseEstimator.aruco_dict, arucoParams)
 # target_board = cv2.aruco.Board(board_points, aruco_dict, np.array([1]))
 
 # Dodecahedron board
-marker_size = 24  # dodecahedron edge length in mm
-pentagon_size = 27.5
-dodecaPoints = dodecaBoard.generate(marker_size, pentagon_size, (0, 0, 135), 'centre')
-ref_board = cv2.aruco.Board(dodecaPoints, aruco_dict, np.arange(11))
-target_board = cv2.aruco.Board(dodecaPoints, aruco_dict, np.arange(11,22))
+target_marker_size = 24  # dodecahedron edge length in mm
+target_pentagon_size = 27.5
+ref_marker_size = 35  # dodecahedron edge length in mm
+ref_pentagon_size = 40
+targetPoints = dodecaBoard.generate(target_marker_size, target_pentagon_size, (0, 0, 253), 'centre')
+refPoints = dodecaBoard.generate(ref_marker_size, ref_pentagon_size, (0, 0, 109), 'centre')
+target_board = cv2.aruco.Board(targetPoints, aruco_dict, np.arange(11))
+ref_board = cv2.aruco.Board(refPoints, aruco_dict, np.arange(11,22))
 
 def runCam(cam, childConn):
     frameTime = 1/60
@@ -67,25 +73,25 @@ def runCam(cam, childConn):
         covariance = None
         
         corners, ids, rejected = detector.detectMarkers(frame)
-        # pose, covariance = poseEstimator.estimate_pose_board(ref_board, target_board, corners, ids)
-        # print(f'Translation: {rel_trans}, Rotation: {rel_rot}')
-        # if rel_trans is not None:
-        #     print(f'X: {rel_trans[0]}, Y: {rel_trans[1]}, Z: {rel_trans[2]}', end='\r')
+        pose, covariance = poseEstimator.estimate_pose_board(ref_board, target_board, corners, ids)
 
         overlayImg = cv2.aruco.drawDetectedMarkers(frame, corners, ids)
         
-        if ids is not None:
-            target_obj_pts, target_img_pts = target_board.matchImagePoints(corners,ids)
-            target_val, target_rvec, target_tvec = cv2.solvePnP(target_obj_pts,target_img_pts,poseEstimator.cv_cam_mat,poseEstimator.cv_dist_coeffs,
-                                                                            rvec=None,tvec=None,useExtrinsicGuess=False,flags=cv2.SOLVEPNP_ITERATIVE)
-            overlayImg = cv2.drawFrameAxes(overlayImg, poseEstimator.cv_cam_mat, poseEstimator.cv_dist_coeffs, target_rvec, target_tvec, 50)
+        # if ids is not None:
+        #     target_obj_pts, target_img_pts = target_board.matchImagePoints(corners,ids)
+        #     target_val, target_rvec, target_tvec = cv2.solvePnP(target_obj_pts,target_img_pts,poseEstimator.cv_cam_mat,poseEstimator.cv_dist_coeffs,
+        #                                                                     rvec=None,tvec=None,useExtrinsicGuess=False,flags=cv2.SOLVEPNP_ITERATIVE)
+        #     overlayImg = cv2.drawFrameAxes(overlayImg, poseEstimator.cv_cam_mat, poseEstimator.cv_dist_coeffs, target_rvec, target_tvec, 50)
         
-            rel_rot_matrix, _ = cv2.Rodrigues(target_rvec)
-            rel_rot_ypr = R.from_matrix(rel_rot_matrix).as_euler('ZYX',degrees=True)
-            rel_rot_ypr = rel_rot_ypr.reshape((3,1))
+        #     rel_rot_matrix, _ = cv2.Rodrigues(target_rvec)
+        #     rel_rot_ypr = R.from_matrix(rel_rot_matrix).as_euler('ZYX',degrees=True)
+        #     rel_rot_ypr = rel_rot_ypr.reshape((3,1))
             
-            pose = np.vstack((target_tvec, rel_rot_ypr))
-            covariance = np.zeros((6,6))
+        #     pose = np.vstack((target_tvec, rel_rot_ypr))
+        #     covariance = np.zeros((6,6))
+            
+        # if pose is not None:
+            # print(f'X: {pose[0]}, Y: {pose[1]}, Z: {pose[2]}', end='\r')
             
         cv2.imshow(f'Camera {cam}', overlayImg)
         
@@ -184,11 +190,13 @@ if __name__ == "__main__":
 
         # final_pose = poses[0]
 
-        # if kalman_filter.has_been_initiated():
-        #     kalman_filter, final_pose = update_kalman(kalman_filter, poses=poses, covars=covars)
-        # else:
-        #     kalman_filter.initiate_state(x0=np.median(poses,axis=0))
-        #     final_pose = kalman_filter.predict()
+        if kalman_filter.has_been_initiated():
+            kalman_filter, final_pose = update_kalman(kalman_filter, poses=poses, covars=covars)
+        else:
+            kalman_filter.initiate_state(x0=np.median(poses,axis=0))
+            final_pose = kalman_filter.predict()
+            
+        print(final_pose)
         
         
         if ROS:

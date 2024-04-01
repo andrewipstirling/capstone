@@ -50,10 +50,10 @@ while True:
     
     corners, ids, rejected = detector.detectMarkers(frame)
 
-    rel_trans, rel_rot, std_dev, ref_tvec = poseEstimator.estimate_pose_board(ref_board, target_board, corners, ids)
+    pose, covariance = poseEstimator.estimate_pose_board(ref_board, target_board, corners, ids)
     # print(f'Translation: {rel_trans}, Rotation: {rel_rot}')
-    if rel_trans is not None:
-        print(f'X: {rel_trans[0]}, Y: {rel_trans[1]}, Z: {rel_trans[2]}', end='\r')
+    if pose is not None:
+        print(f'X: {pose[0]}, Y: {pose[1]}, Z: {pose[2]}', end='\r')
     
     overlayImg = cv2.aruco.drawDetectedMarkers(frame, corners, ids)
     
