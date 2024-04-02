@@ -9,9 +9,9 @@ import time
 
 ### PRESS Q ON EACH WINDOW TO QUIT ###
 
-ROS = False
-cams = [1,2,3,4,5] # Camera IDs that correspond to label on pi and port number 500X
-# cams = [1]
+ROS = True
+# cams = [1,2,3,4,5] # Camera IDs that correspond to label on pi and port number 500X
+cams = [1]
 if ROS:
     import rospy
     from geometry_msgs.msg import Pose
@@ -76,8 +76,8 @@ def runCam(cam, childConn):
         corners, ids, rejected = detector.detectMarkers(frame)
         pose, covariance = poseEstimator.estimate_pose_board(ref_board, target_board, corners, ids)
 
-        # overlayImg = cv2.aruco.drawDetectedMarkers(frame, corners, ids)
-        # cv2.imshow(f'Camera {cam}', overlayImg)
+        overlayImg = cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+        cv2.imshow(f'Camera {cam}', overlayImg)
         
         # if ids is not None:
         #     target_obj_pts, target_img_pts = target_board.matchImagePoints(corners,ids)
@@ -195,7 +195,7 @@ if __name__ == "__main__":
         publisher = rospy.Publisher('/gazebo/set_model_state',ModelState, queue_size=1)
         pose_msg = ModelState()
         pose_msg.model_name = 'surgical_pointer'
-        rate = rospy.Rate(100)
+        rate = rospy.Rate(60)
     
     kalman_filter = KalmanFilterCV(60)
     # kalman_filter.initiate_state(x0=np.zeros((6,1)))
@@ -217,7 +217,9 @@ if __name__ == "__main__":
     
     while True:
         if True not in (process.is_alive() for process in processes): break
-        if ROS and rospy.is_shutdown(): break
+        if ROS and rospy.is_shutdown(): 
+            cv2.destroyAllWindows()
+            break
         
         poses = []
         covars = []
@@ -241,7 +243,7 @@ if __name__ == "__main__":
                 final_pose = kalman_filter.predict().reshape((12,1))[0:6]
         
             
-        print(final_pose)
+        # print(final_pose)
         
         # currPublish = time.time()
         # diff = currPublish-lastPublish
@@ -249,11 +251,15 @@ if __name__ == "__main__":
         # lastPublish=currPublish
 
         if ROS:
-            pose_msg = ros_publish(final_pose, pose_msg)
-            publisher.publish(pose_msg)
+            if len(poses)>0:
+                pose_msg = ros_publish(final_pose, pose_msg)
+                publisher.publish(pose_msg)
+                
             rate.sleep()
 
 
+
+    cv2.destroyAllWindows()
 # poseEstimator.plot(trueTrans=[-155.2, 0, 0], trueRot=[0, 0, 0])
 # poseEstimator.plot()
 # avgPos = np.average(poseEstimator.total_distance, axis=0)
