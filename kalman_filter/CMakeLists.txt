@@ -170,6 +170,7 @@ include_directories(
 catkin_install_python(PROGRAMS
   src/node.py
   src/real_multicam.py
+  src/real_multicam_ros.py
   src/kalman_filter/kalman.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

@@ -6,18 +6,20 @@ import cv2
 import numpy as np
 import multiprocessing as mp
 import time
+import rospy
+from geometry_msgs.msg import Pose
+from gazebo_msgs.msg import ModelState
 
 ### PRESS Q ON EACH WINDOW TO QUIT ###
-
-ROS = True
-RATE = 15
-# cams = [1,2,3,4,5] # Camera IDs that correspond to label on pi and port number 500X
-cams = [1,3,5]
-if ROS:
-    import rospy
-    from geometry_msgs.msg import Pose
-    from gazebo_msgs.msg import ModelState
-
+RATE = 10
+cams = [1,2,5] # Camera IDs that correspond to label on pi and port number 500X
+# cams = [1]
+#### NOTES TO SELF ####
+"""
+Worked well:
+RATE = 10
+cams = [1,5] 
+"""
 # caps = []
 # for cam in cams[:]:
 #     cap = cv2.VideoCapture(f"udpsrc address=192.168.5.2 port=500{cam} ! application/x-rtp, clock-rate=90000, payload=96 ! rtph264depay ! h264parse ! avdec_h264 discard-corrupted-frames=true skip-frame=1 ! videoconvert ! video/x-raw, format=BGR ! appsink max-buffers=1 drop=true sync=false", cv2.CAP_GSTREAMER)
@@ -187,20 +189,7 @@ def ros_publish(final_pose:np.ndarray, pose_msg):
     
     return pose_msg
 
-if __name__ == "__main__":
-    if ROS: 
-        rospy.init_node('pose_estimation', anonymous=True,log_level=rospy.INFO)
-        # publisher = rospy.Publisher('kalman_filter/pose_estimate',Pose, queue_size=1)
-        # pose_msg = Pose()
-        
-        publisher = rospy.Publisher('/gazebo/set_model_state',ModelState, queue_size=15,tcp_nodelay=True)
-        # publisher = rospy.Publisher('/gazebo/set_model_state',ModelState, queue_size=1, tcp_nodelay=True)
-        pose_msg = ModelState()
-        pose_msg.model_name = 'surgical_pointer'
-        rate = rospy.Rate(RATE)
-
-    kalman_filter = KalmanFilterCV(RATE)
-    # kalman_filter.initiate_state(x0=np.zeros((6,1)))
+def ros_main(cams):
     processes = []
     parentConns = []
     childConns = []
@@ -213,19 +202,29 @@ if __name__ == "__main__":
         processes.append(process)
         parentConns.append(parentConn)
         childConns.append(childConn)
+
+    rospy.init_node('pose_estimation', anonymous=True,log_level=rospy.INFO)
+    # publisher = rospy.Publisher('kalman_filter/pose_estimate',Pose, queue_size=1)
+    # pose_msg = Pose()
     
+    publisher = rospy.Publisher('/gazebo/set_model_state',ModelState, queue_size=1,tcp_nodelay=True)
+    # publisher = rospy.Publisher('/gazebo/set_model_state',ModelState, queue_size=1, tcp_nodelay=True)
+    pose_msg = ModelState()
+    pose_msg.model_name = 'surgical_pointer'
+    rate = rospy.Rate(RATE)
     # lastPublish = time.time()
+    kalman_filter = KalmanFilterCV(RATE)
     final_pose = np.zeros((6,1))
+
     
-    while True:
-        if True not in (process.is_alive() for process in processes): break
-        if ROS and rospy.is_shutdown(): 
-            cv2.destroyAllWindows()
-            break
+    while not rospy.is_shutdown():
+        
+        if True not in (process.is_alive() for process in processes):
+            rospy.signal_shutdown(reason="Process died")
         
         poses = []
         covars = []
-        
+    
         for i, cam in enumerate(cams):
             pose, covar = parentConns[i].recv()
             if pose is not None:
@@ -236,33 +235,38 @@ if __name__ == "__main__":
         #     final_pose = np.median(poses, axis=0)
         # else:
         #     final_pose = np.zeros((6,1))
-        
+    
         if len(poses) > 0:
             if kalman_filter.has_been_initiated():
                 kalman_filter, final_pose = update_kalman(kalman_filter, poses=poses, covars=covars)
             else:
                 kalman_filter.initiate_state(x0=np.median(poses,axis=0))
                 final_pose = kalman_filter.predict().reshape((12,1))[0:6]
+    
         
-            
         # print(final_pose)
-        
+        rospy.loginfo_throttle(1, 'Position [x, y, z]: \n %s',final_pose[0:3])
         # currPublish = time.time()
         # diff = currPublish-lastPublish
         # print(diff)
         # lastPublish=currPublish
 
-        if ROS:
-            if len(poses)>0:
-                pose_msg = ros_publish(final_pose, pose_msg)
-                publisher.publish(pose_msg)
-                
-            rate.sleep()
+        
+        if len(poses)>0:
+            pose_msg = ros_publish(final_pose, pose_msg)
+            publisher.publish(pose_msg)
+            
+        rate.sleep()
 
-
+    
 
     cv2.destroyAllWindows()
-# poseEstimator.plot(trueTrans=[-155.2, 0, 0], trueRot=[0, 0, 0])
-# poseEstimator.plot()
-# avgPos = np.average(poseEstimator.total_distance, axis=0)
-# print(f'Avg X: {avgPos[0]}, Y: {avgPos[1]}, Z: {avgPos[2]}')
+    return
+
+
+if __name__ == "__main__":
+
+    try:
+        ros_main(cams)
+    except rospy.ROSInterruptException:
+        pass
