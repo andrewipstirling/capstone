@@ -11,10 +11,11 @@ import time
 
 ROS = False
 cams = [1,2,3,4,5] # Camera IDs that correspond to label on pi and port number 500X
-# cams = [1, 2]
+# cams = [1]
 if ROS:
     import rospy
     from geometry_msgs.msg import Pose
+    from gazebo_msgs.msg import ModelState
 
 # caps = []
 # for cam in cams[:]:
@@ -25,7 +26,7 @@ if ROS:
 #     else: caps.append(cap)
         
 
-poseEstimator = pose_estimation(framerate=60, plotting=True)
+poseEstimator = pose_estimation(framerate=60, plotting=False)
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_100)
 arucoParams = cv2.aruco.DetectorParameters()
 arucoParams.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_SUBPIX
@@ -75,31 +76,42 @@ def runCam(cam, childConn):
         corners, ids, rejected = detector.detectMarkers(frame)
         pose, covariance = poseEstimator.estimate_pose_board(ref_board, target_board, corners, ids)
 
-        overlayImg = cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+        # overlayImg = cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+        # cv2.imshow(f'Camera {cam}', overlayImg)
         
         # if ids is not None:
         #     target_obj_pts, target_img_pts = target_board.matchImagePoints(corners,ids)
-        #     target_val, target_rvec, target_tvec = cv2.solvePnP(target_obj_pts,target_img_pts,poseEstimator.cv_cam_mat,poseEstimator.cv_dist_coeffs,
-        #                                                                     rvec=None,tvec=None,useExtrinsicGuess=False,flags=cv2.SOLVEPNP_ITERATIVE)
-        #     overlayImg = cv2.drawFrameAxes(overlayImg, poseEstimator.cv_cam_mat, poseEstimator.cv_dist_coeffs, target_rvec, target_tvec, 50)
-        
-        #     rel_rot_matrix, _ = cv2.Rodrigues(target_rvec)
-        #     rel_rot_ypr = R.from_matrix(rel_rot_matrix).as_euler('ZYX',degrees=True)
-        #     rel_rot_ypr = rel_rot_ypr.reshape((3,1))
+        #     if (target_img_pts is None):
+        #         # print("Couldn't match object points...")
+        #         pose=None
             
-        #     pose = np.vstack((target_tvec, rel_rot_ypr))
-        #     covariance = np.zeros((6,6))
+            
+        #     elif (len(target_img_pts) < 3):
+        #         # print("Not enough object points for SolvePnP")
+        #         pose=None
+        #     else:
+        #         target_val, target_rvec, target_tvec = cv2.solvePnP(target_obj_pts,target_img_pts,poseEstimator.cv_cam_mat,poseEstimator.cv_dist_coeffs,
+        #                                                                         rvec=None,tvec=None,useExtrinsicGuess=False,flags=cv2.SOLVEPNP_ITERATIVE)
+        #         overlayImg = cv2.drawFrameAxes(overlayImg, poseEstimator.cv_cam_mat, poseEstimator.cv_dist_coeffs, target_rvec, target_tvec, 50)
+            
+        #         rel_rot_matrix, _ = cv2.Rodrigues(target_rvec)
+        #         rel_rot_ypr = R.from_matrix(rel_rot_matrix).as_euler('ZYX',degrees=True)
+        #         rel_rot_ypr = rel_rot_ypr.reshape((3,1))
+                
+        #         pose = np.vstack((target_tvec, rel_rot_ypr))
+        #         covariance = np.zeros((6,6))
+            
             
         # if pose is not None:
-            # print(f'X: {pose[0]}, Y: {pose[1]}, Z: {pose[2]}', end='\r')
+        #     print(f'X: {pose[0]}, Y: {pose[1]}, Z: {pose[2]}', end='\r')
             
-        cv2.imshow(f'Camera {cam}', overlayImg)
+        
         
         childConn.send((pose, covariance))
         
         # print(time.time()-capTime)
-        deltaTime = time.time() - capTime
-        if deltaTime < frameTime: time.sleep(frameTime-deltaTime)
+        # deltaTime = time.time() - capTime
+        # if deltaTime < frameTime: time.sleep(frameTime-deltaTime)
 
     cap.release()
     childConn.close()
@@ -139,26 +151,51 @@ def update_kalman(kalman: KalmanFilterCV, poses: list, covars: list):
     
 
 def ros_publish(final_pose:np.ndarray, pose_msg):
-    if final_pose is not None:
-        pose_msg.position.x = final_pose[0]
-        pose_msg.position.y = final_pose[1]
-        pose_msg.position.z = final_pose[2]
+    # if final_pose is not None:
+    #     pose_msg.position.x = final_pose[0]
+    #     pose_msg.position.y = final_pose[1]
+    #     pose_msg.position.z = final_pose[2]
         
+    #     euler = final_pose[3:].ravel()
+    #     quat = R.from_euler(seq='ZYX',angles=euler,degrees=True).as_quat()
+    #     pose_msg.orientation.x = quat[0]
+    #     pose_msg.orientation.y = quat[1]
+    #     pose_msg.orientation.z = quat[2]
+    #     pose_msg.orientation.w = quat[3]
+
+    if final_pose is not None:
+        # Translate for origin of marker object in gazebo
+        pose_msg.pose.position.x = (final_pose[0]/1000) + -0.023
+        pose_msg.pose.position.y = (final_pose[1]/1000) + -0.051
+        pose_msg.pose.position.z = (final_pose[2]/1000) + 0
         euler = final_pose[3:].ravel()
         quat = R.from_euler(seq='ZYX',angles=euler,degrees=True).as_quat()
-        pose_msg.orientation.x = quat[0]
-        pose_msg.orientation.y = quat[1]
-        pose_msg.orientation.z = quat[2]
-        pose_msg.orientation.w = quat[3]
+        pose_msg.pose.orientation.x = quat[0]
+        pose_msg.pose.orientation.y = quat[1]
+        pose_msg.pose.orientation.z = quat[2]
+        pose_msg.pose.orientation.w = quat[3]
 
+    # else:
+    #     pose_msg.pose.position.x = 0
+    #     pose_msg.pose.position.y = 0
+    #     pose_msg.pose.position.z
+    #     pose_msg.pose.orientation.x = 0
+    #     pose_msg.pose.orientation.y = 0
+    #     pose_msg.pose.orientation.z = 0
+    #     pose_msg.pose.orientation.w = 0
+    
     return pose_msg
 
 if __name__ == "__main__":
     if ROS: 
         rospy.init_node('pose_estimation', anonymous=True,log_level=rospy.INFO)
-        publisher = rospy.Publisher('kalman_filter/pose_estimate',Pose, queue_size=1)
-        pose_msg = Pose()
-        rate = rospy.Rate(60)
+        # publisher = rospy.Publisher('kalman_filter/pose_estimate',Pose, queue_size=1)
+        # pose_msg = Pose()
+
+        publisher = rospy.Publisher('/gazebo/set_model_state',ModelState, queue_size=1)
+        pose_msg = ModelState()
+        pose_msg.model_name = 'surgical_pointer'
+        rate = rospy.Rate(100)
     
     kalman_filter = KalmanFilterCV(60)
     # kalman_filter.initiate_state(x0=np.zeros((6,1)))
@@ -175,6 +212,9 @@ if __name__ == "__main__":
         parentConns.append(parentConn)
         childConns.append(childConn)
     
+    # lastPublish = time.time()
+    final_pose = np.zeros((6,1))
+    
     while True:
         if True not in (process.is_alive() for process in processes): break
         if ROS and rospy.is_shutdown(): break
@@ -188,17 +228,26 @@ if __name__ == "__main__":
                 poses.append(pose)
                 covars.append(covar)
 
-        # final_pose = poses[0]
-
-        if kalman_filter.has_been_initiated():
-            kalman_filter, final_pose = update_kalman(kalman_filter, poses=poses, covars=covars)
-        else:
-            kalman_filter.initiate_state(x0=np.median(poses,axis=0))
-            final_pose = kalman_filter.predict()
+        # if pose is not None:
+        #     final_pose = np.median(poses, axis=0)
+        # else:
+        #     final_pose = np.zeros((6,1))
+        
+        if len(poses) > 0:
+            if kalman_filter.has_been_initiated():
+                kalman_filter, final_pose = update_kalman(kalman_filter, poses=poses, covars=covars)
+            else:
+                kalman_filter.initiate_state(x0=np.median(poses,axis=0))
+                final_pose = kalman_filter.predict().reshape((12,1))[0:6]
+        
             
         print(final_pose)
         
-        
+        # currPublish = time.time()
+        # diff = currPublish-lastPublish
+        # print(diff)
+        # lastPublish=currPublish
+
         if ROS:
             pose_msg = ros_publish(final_pose, pose_msg)
             publisher.publish(pose_msg)

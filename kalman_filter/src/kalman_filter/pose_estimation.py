@@ -151,7 +151,10 @@ class pose_estimation:
                 # Relative Translation Calculation
                 # Go from object coordinates to world coordinates
                 # T_{t//r} = T_{c//r} + (-T_{c//t})
-                rel_trans = ref_tvec - target_tvec  # Camera's reference frame
+                # rel_trans = ref_tvec - target_tvec  # Camera's reference frame
+                # rel_trans = ref_rot_mat.T @ rel_trans  # Reference's reference frame
+                # rel_trans = np.array(rel_trans).reshape((3,1))
+                rel_trans = target_tvec - ref_tvec  # Camera's reference frame
                 rel_trans = ref_rot_mat.T @ rel_trans  # Reference's reference frame
                 rel_trans = np.array(rel_trans).reshape((3,1))
                 
@@ -159,6 +162,11 @@ class pose_estimation:
                 # R_{t//r} = R_{t//c} @ R_{c//r}
                 # As Matrix
                 rel_rot_matrix = target_rot_mat.T @ ref_rot_mat
+
+                # # solvePnp returns rotation of camera relative to marker !!
+                # # R_{t//r} = R_{t//c} @ R_{c//r}
+                # # As Matrix
+                # rel_rot_matrix = target_rot_mat @ ref_rot_mat.T
                 
                 # As Yaw-Pitch-Roll Vector
                 rel_rot_ypr = R.from_matrix(rel_rot_matrix).as_euler('ZYX',degrees=True)

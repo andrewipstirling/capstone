@@ -12,7 +12,7 @@ class ControlPointer:
 
         self.model_msg = ModelState()
         self.model_msg.model_name = 'surgical_pointer'
-        self.pub = rospy.Publisher('/gazebo/set_model_state',ModelState, queue_size=1)
+        self.pub = rospy.Publisher('/gazebo/set_model_state',ModelState, queue_size=0)
         self.sub = rospy.Subscriber('/kalman_filter/pose_estimate',Pose,self.pose_cb)
         
         rospy.loginfo("Succesfully connected with control pointer")
@@ -44,7 +44,7 @@ class ControlPointer:
         # rospy.loginfo_throttle(2,"Read Pose Succesfully as: %s", self.model_msg)
         
         # Publish
-        rospy.loginfo_throttle(1, "Succesfully published %s", self.model_msg)
+        # rospy.loginfo_throttle(1, "Succesfully published %s", self.model_msg)
         self.pub.publish(self.model_msg)
 
     

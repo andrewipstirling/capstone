@@ -51,7 +51,6 @@ while True:
     corners, ids, rejected = detector.detectMarkers(frame)
 
     pose, covariance = poseEstimator.estimate_pose_board(ref_board, target_board, corners, ids)
-    # print(f'Translation: {rel_trans}, Rotation: {rel_rot}')
     if pose is not None:
         print(f'X: {pose[0]}, Y: {pose[1]}, Z: {pose[2]}', end='\r')
     
