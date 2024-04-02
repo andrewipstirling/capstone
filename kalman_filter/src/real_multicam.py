@@ -191,8 +191,9 @@ if __name__ == "__main__":
         rospy.init_node('pose_estimation', anonymous=True,log_level=rospy.INFO)
         # publisher = rospy.Publisher('kalman_filter/pose_estimate',Pose, queue_size=1)
         # pose_msg = Pose()
-
+        
         publisher = rospy.Publisher('/gazebo/set_model_state',ModelState, queue_size=1)
+        # publisher = rospy.Publisher('/gazebo/set_model_state',ModelState, queue_size=1, tcp_nodelay=True)
         pose_msg = ModelState()
         pose_msg.model_name = 'surgical_pointer'
         rate = rospy.Rate(60)
