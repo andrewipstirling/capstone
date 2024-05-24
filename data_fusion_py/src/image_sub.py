@@ -322,7 +322,7 @@ class ImageSub:
     
 
 def main():
-    real_camera = True
+    real_camera = False
     if real_camera:
         # image_sub_1 = ImageSub(sub_topic_name='/real_cam_1/image_raw',pub_topic_name='/pi_camera_1/pose_estimate',real=True)
         # image_sub_2 = ImageSub(sub_topic_name='/real_cam_2/image_raw',pub_topic_name='/pi_camera_2/pose_estimate',real=True)
@@ -344,11 +344,11 @@ def main():
     rospy.Rate(PUBRATE)
 
     while not rospy.is_shutdown():
-        # image_sub_1.update()
-        # image_sub_2.update()
-        # image_sub_3.update()
+        image_sub_1.update()
+        image_sub_2.update()
+        image_sub_3.update()
         image_sub_4.update()
-        # image_sub_5.update()
+        image_sub_5.update()
         
     cv2.destroyAllWindows()
     # Plotting 

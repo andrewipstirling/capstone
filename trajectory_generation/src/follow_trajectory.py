@@ -32,7 +32,6 @@ class PubTraj:
         self.count = 0
         self.model_msg = ModelState()
         self.pub = rospy.Publisher('/gazebo/set_model_state', ModelState, queue_size=1)
-
         self.sub = rospy.Subscriber('/gazebo/model_states',ModelStates,self.pose_cb)
         self.has_start = False
 
