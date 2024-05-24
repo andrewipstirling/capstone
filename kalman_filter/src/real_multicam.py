@@ -47,8 +47,8 @@ target_marker_size = 24  # dodecahedron edge length in mm
 target_pentagon_size = 27.5
 ref_marker_size = 35  # dodecahedron edge length in mm
 ref_pentagon_size = 40
-targetPoints = dodecaBoard.generate(target_marker_size, target_pentagon_size, (0, 0, 253), 'centre')
-refPoints = dodecaBoard.generate(ref_marker_size, ref_pentagon_size, (0, 0, 109), 'centre')
+targetPoints = dodecaBoard.generate(target_marker_size, target_pentagon_size, (0, 0, 251.62), 'centre')
+refPoints = dodecaBoard.generate(ref_marker_size, ref_pentagon_size, (0, 0, 110.74), 'centre')
 target_board = cv2.aruco.Board(targetPoints, aruco_dict, np.arange(11))
 ref_board = cv2.aruco.Board(refPoints, aruco_dict, np.arange(11,22))
 
@@ -76,8 +76,8 @@ def runCam(cam, childConn):
         corners, ids, rejected = detector.detectMarkers(frame)
         pose, covariance = poseEstimator.estimate_pose_board(ref_board, target_board, corners, ids)
 
-        # overlayImg = cv2.aruco.drawDetectedMarkers(frame, corners, ids)
-        # cv2.imshow(f'Camera {cam}', overlayImg)
+        overlayImg = cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+        cv2.imshow(f'Camera {cam}', overlayImg)
         
         # if ids is not None:
         #     target_obj_pts, target_img_pts = target_board.matchImagePoints(corners,ids)
@@ -110,8 +110,8 @@ def runCam(cam, childConn):
         childConn.send((pose, covariance))
         
         # print(time.time()-capTime)
-        # deltaTime = time.time() - capTime
-        # if deltaTime < frameTime: time.sleep(frameTime-deltaTime)
+        deltaTime = time.time() - capTime
+        if deltaTime < frameTime: time.sleep(frameTime-deltaTime)
 
     cap.release()
     childConn.close()

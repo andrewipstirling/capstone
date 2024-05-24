@@ -22,10 +22,10 @@ detector = cv2.aruco.ArucoDetector(poseEstimator.aruco_dict, arucoParams)
 m = 33.2/2 # half of marker length (currently in mm)
 
 # Single marker board
-# board_points = np.array([[[-m, m, 0],[m, m, 0],[m, -m, 0],[-m, -m, 0]]],dtype=np.float32)
+board_points = np.array([[[-m, m, 0],[m, m, 0],[m, -m, 0],[-m, -m, 0]]],dtype=np.float32)
 
-# ref_board = cv2.aruco.Board(board_points, aruco_dict, np.array([0]))
-# target_board = cv2.aruco.Board(board_points, aruco_dict, np.array([1]))
+ref_board = cv2.aruco.Board(board_points, aruco_dict, np.array([0]))
+target_board = cv2.aruco.Board(board_points, aruco_dict, np.array([1]))
 
 # Dodecahedron board
 target_marker_size = 24  # dodecahedron edge length in mm
