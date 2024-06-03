@@ -6,17 +6,25 @@ import cv2
 import numpy as np
 import multiprocessing as mp
 import time
+import pyigtl
+
 
 ### PRESS Q ON EACH WINDOW TO QUIT ###
 
 ROS = True
 RATE = 15
+IGT = True
+IGT_Port = 6000
 # cams = [1,2,3,4,5] # Camera IDs that correspond to label on pi and port number 500X
 cams = [1,3,5]
+
 if ROS:
     import rospy
     from geometry_msgs.msg import Pose
     from gazebo_msgs.msg import ModelState
+    
+if IGT:
+    server = pyigtl.OpenIGTLinkServer(port=IGT_Port)
 
 # caps = []
 # for cam in cams[:]:
@@ -187,6 +195,8 @@ def ros_publish(final_pose:np.ndarray, pose_msg):
     
     return pose_msg
 
+
+
 if __name__ == "__main__":
     if ROS: 
         rospy.init_node('pose_estimation', anonymous=True,log_level=rospy.INFO)
@@ -218,6 +228,10 @@ if __name__ == "__main__":
     final_pose = np.zeros((6,1))
     
     while True:
+        if IGT and not server.is_connected():
+            time.sleep(0.1)
+            continue
+        
         if True not in (process.is_alive() for process in processes): break
         if ROS and rospy.is_shutdown(): 
             cv2.destroyAllWindows()
@@ -259,9 +273,15 @@ if __name__ == "__main__":
                 
             rate.sleep()
 
-
+        if IGT:
+            point = final_pose[:2]
+            quaternions = cv2.createFromEulerAngles(final_pose[3:], cv2.QuatEnum_INT_XYZ)
+            position_message = pyigtl.PositionMessage(point, quaternions, device_name='Position')
+            server.send_message(position_message, wait=True)
 
     cv2.destroyAllWindows()
+
+
 # poseEstimator.plot(trueTrans=[-155.2, 0, 0], trueRot=[0, 0, 0])
 # poseEstimator.plot()
 # avgPos = np.average(poseEstimator.total_distance, axis=0)
