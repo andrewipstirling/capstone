@@ -14,7 +14,7 @@ import pyigtl
 ROS = True
 RATE = 15
 IGT = True
-IGT_Port = 6000
+IGT_Port = 18955
 # cams = [1,2,3,4,5] # Camera IDs that correspond to label on pi and port number 500X
 cams = [1,3,5]
 
@@ -275,8 +275,8 @@ if __name__ == "__main__":
 
         if IGT:
             point = final_pose[:2]
-            quaternions = cv2.createFromEulerAngles(final_pose[3:], cv2.QuatEnum_INT_XYZ)
-            position_message = pyigtl.PositionMessage(point, quaternions, device_name='Position')
+            quaternions = cv2.createFromEulerAngles(final_pose[3:], cv2.QUAT_ENUM_EXT_ZYX)
+            position_message = pyigtl.PositionMessage(point, quaternions, device_name='Pointer')
             server.send_message(position_message, wait=True)
 
     cv2.destroyAllWindows()
